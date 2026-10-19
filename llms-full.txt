@@ -1,0 +1,4818 @@
+# @donglegeyu/company-mobile-ui — llms-full.txt
+
+> @donglegeyu/company-mobile-ui@0.1.1，基于 Ant Design Mobile 5.x，品牌主色 #F95914。
+> 本文件由 scripts/gen-llms.mjs 自动生成，将全部组件文档合并为一个纯文本文件。
+> 生成命令：npm run gen:llms
+
+## 九条强制规则（AI Agent 生成代码必须遵守）
+
+1. 禁止使用 antd-mobile 原生组件 — 用 MobileXxx（如 MobileButton，不用 Button）；import type 类型导入允许；ConfigProvider 仅用于 locale
+2. 禁止硬编码颜色 — 用 var(--adm-color-*) / var(--mobile-color-*) 或 mobileDesignRules 常量
+3. 禁止使用 !important — 用内联 style（权重天然更高）或 CSS Modules 合规层级选择器
+4. 禁止使用 any 类型 — 定义明确的 TypeScript interface
+5. 禁止默认导出 — 用 export function / export const
+6. ConfigProvider 只传 locale，禁止传 theme prop（antd-mobile v5 静默忽略）；局部覆盖用 generateMobileThemeVars() 透传容器 style
+7. 移动端硬规范：可点击元素 ≥ 44×44（--mobile-touch-target）；贴边组件用 .mobile-safe-area-top/.mobile-safe-area-bottom；单位统一 px（禁 rem/em/vw）；禁止 onMouseEnter/onMouseLeave/onDoubleClick 等 PC 事件；-webkit-tap-highlight-color: transparent
+8. 业务模板优先于基础组件：业务模板（建设中）→ 共享组件（MobileIconExplorer）→ 基础组件手动拼装
+9. 不确定 Props 先查类型定义（node_modules/@donglegeyu/company-mobile-ui/dist/es/index.d.ts），不要凭记忆写
+
+## 移动端专属规范
+
+- 触摸目标 ≥ 44×44（--mobile-touch-target / mobileDesignRules.touchTarget）
+- 安全区域适配：.mobile-safe-area-top / .mobile-safe-area-bottom / env(safe-area-inset-*)
+- 长度单位统一 px（项目配置 postcss-px-to-viewport-8-plugin，禁混用 rem/em/vw）
+- 禁用 PC 事件（onMouseEnter / onMouseLeave / onDoubleClick），用 onClick / onTouchStart
+- 可点击元素加 -webkit-tap-highlight-color: transparent
+
+## 主题机制速查
+
+| Token | 值 | 用途 |
+|---|---|---|
+| --adm-color-primary | #F95914 | 主色（覆盖 antd-mobile 默认蓝 #1677ff） |
+| --adm-color-wathet | #FFF1E6 | 浅橙背景（选中态/背景） |
+| --adm-color-success | #00B42A | 成功 |
+| --adm-color-warning | #FF7D00 | 警告 |
+| --adm-color-danger | #F53F3F | 危险 |
+| --mobile-color-primary-hover | #E04E0E | 按压态 |
+| --mobile-touch-target | 44px | 最小触摸目标 |
+| --mobile-radius-base | 8px | 基础圆角（sm 6 / base 8 / lg 12 / full 9999） |
+
+运行时读取：CSS 变量 var(--adm-color-primary) → mobileDesignRules 常量 → useMobileToken()。
+
+---
+
+
+# 基础组件
+
+## 通用（4 个）
+
+### 按钮 Button
+
+# 按钮 Button
+
+用于开始一个即时操作，标记了一个或封装一组操作命令，响应用户点击行为，触发相应的业务逻辑。基于 antd-mobile Button 封装，注入企业品牌主题色，Props 完美透传。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/basic.tsx"></code>
+
+### 形状与尺寸
+
+<code src="./demos/shape-size.tsx"></code>
+
+### 状态与加载
+
+<code src="./demos/state.tsx"></code>
+
+## API
+
+继承 antd-mobile [ButtonProps](https://mobile.ant.design/zh/components/button#api)，完整支持以下属性。
+
+### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| block | 是否是块级元素 | `boolean` | `false` |
+| color | 按钮的颜色 | `'default' \| 'primary' \| 'success' \| 'warning' \| 'danger'` | `'default'` |
+| disabled | 是否禁用 | `boolean` | `false` |
+| fill | 填充模式 | `'solid' \| 'outline' \| 'none'` | `'solid'` |
+| loading | 是否处于加载状态，`'auto'` 模式会监听 onClick 的 Promise 状态自动更新 loading | `boolean \| 'auto'` | `false` |
+| loadingIcon | 加载状态下的 icon 图标 | `ReactNode` | `<DotLoading />` |
+| loadingText | 加载状态下额外展示的文字 | `string` | - |
+| onClick | 点击事件 | `(event: React.MouseEvent) => void \| Promise<void>` | - |
+| shape | 按钮的形状 | `'default' \| 'rounded' \| 'rectangular'` | `'default'` |
+| size | 大小 | `'mini' \| 'small' \| 'middle' \| 'large'` | `'middle'` |
+| type | 原生 button 元素的 type 属性 | `'submit' \| 'reset' \| 'button'` | `'button'` |
+
+此外，还支持原生 `button` 元素的以下属性：`onMouseDown` `onMouseUp` `onTouchStart` `onTouchEnd` `form`。
+
+### CSS 变量
+
+通过 CSS 变量可自定义按钮样式，企业主题已统一注入品牌色 `#F95914`。
+
+| 属性 | 说明 | 默认值 | 全局变量 |
+| --- | --- | --- | --- |
+| `--background-color` | 背景颜色 | `var(--adm-color-background)` | `--adm-button-background-color` |
+| `--border-color` | 边框颜色 | `var(--adm-color-border)` | `--adm-button-border-color` |
+| `--border-radius` | 圆角大小 | `4px` | `--adm-button-border-radius` |
+| `--border-style` | 边框样式 | `solid` | `--adm-button-border-style` |
+| `--border-width` | 边框宽度 | `1px` | `--adm-button-border-width` |
+| `--text-color` | 文字颜色 | `var(--adm-color-text)` | `--adm-button-text-color` |
+
+### Ref
+
+| 属性 | 说明 | 类型 |
+| --- | --- | --- |
+| `nativeElement` | 原始 button 元素 | `HtmlButtonElement \| null` |
+
+---
+
+### 点状加载 DotLoading
+
+# 点状加载 DotLoading
+
+点状加载动画，大小会自动根据当前的文字大小进行调整。适用于按钮加载态、局部内容加载占位等场景。
+
+## 何时使用
+
+页面局部处于等待异步数据或正在渲染过程时，合适的加载动效会有效缓解用户的焦虑。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/dotloading-basic.tsx"></code>
+
+## API
+
+继承 antd-mobile [DotLoadingProps](https://mobile.ant.design/zh/components/dot-loading#api)，完整支持所有原生属性。
+
+### 属性
+
+| 属性  | 说明 | 类型                                          | 默认值      |
+| ----- | ---- | --------------------------------------------- | ----------- |
+| color | 颜色 | `'default' \| 'primary' \| 'white' \| string` | `'default'` |
+
+MobileDotLoading 的大小会自动根据当前的文字大小进行调整。
+
+---
+
+### 图标 Icon
+
+# 图标 Icon
+
+语义化的矢量图形。与 PC 端共享同一套 IconPark 精选图标（strokeWidth 4 线性风格），全部继承 `currentColor`，可随主题动态切换。
+
+> 调用方式与 antd-mobile-icons 一致，每个图标是独立具名导出组件，支持 Tree-Shaking。图标名称采用 `XxxOutline` / `XxxFillOutline` 命名规范。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/icon-basic.tsx"></code>
+
+## API
+
+### MobileIcon
+
+通过 `MobileIcon.XxxOutline` 形式调用，每个图标都是独立的 React 组件。
+
+| 参数 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| fontSize | 图标尺寸 | `number \| string` | `1em` |
+| color | 图标颜色，默认继承父级文本色 | `string` | `currentColor` |
+| spin | 是否旋转动画 | `boolean` | `false` |
+| rotate | 旋转角度（deg） | `number` | - |
+| className | 自定义类名 | `string` | - |
+| style | 自定义样式 | `React.CSSProperties` | - |
+| onClick | 点击回调 | `(e: React.MouseEvent) => void` | - |
+
+### 使用示例
+
+```tsx | pure
+import React from 'react';
+import { MobileIcon } from '@donglegeyu/company-mobile-ui';
+
+export default () => (
+  <>
+    <MobileIcon.SearchOutline fontSize={24} />
+    <MobileIcon.HomeOutline color="var(--adm-color-primary)" />
+    <MobileIcon.SettingOutline spin />
+  </>
+);
+```
+
+### 图标清单（59 个）
+
+| 分类 | 图标名称 |
+| --- | --- |
+| 箭头方向 | DownOutline、UpOutline、LeftOutline、RightOutline、RefreshOutline |
+| 操作交互 | SearchOutline、EditOutline、WritingFluentlyOutline、MoreOneOutline、MoreOutline、CheckOneOutline、CloseOutline、AddOneOutline、MinusOneOutline、DeleteTwoOutline、SaveOutline、PreviewOpenOutline、PreviewCloseOneOutline、CopyOutline、ZoomInOutline、ZoomOutOutline |
+| 系统导航 | HomeOutline、SettingOutline、LogoutOutline、FavoritesOutline、StarOutline、StarFillOutline、PinOutline、PushpinOutline、BookmarkOutline、TagOutline、ConfigOutline、ToolOutline、RadarOutline |
+| 布局排版 | DragOutline、DensityOutline、MoreAppOutline、HamburgerButtonOutline、WaterfallsHOutline、ListOutline、PicOutline、EqualizerOutline |
+| 业务通用 | PeopleTopCardOutline、DocSearchOutline、OrderOutline、ShoppingCartDelOutline、BuyOutline、CommodityOutline、FileCabinetOutline、MessageSecurityOutline、CommentsOutline、TableOutline、BoxOutline、DatabaseConfigOutline、ScanSettingOutline、CategoryManagementOutline、UserPositioningOutline、AllApplicationOutline、FolderOpenOutline |
+
+---
+
+### 转圈加载 SpinLoading
+
+# 转圈加载 SpinLoading
+
+环形旋转加载动画，用于页面或区块的整体加载占位。
+
+## 何时使用
+
+页面局部处于等待异步数据或正在渲染过程时，合适的加载动效会有效缓解用户的焦虑。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/spinloading-basic.tsx"></code>
+
+## API
+
+继承 antd-mobile [SpinLoadingProps](https://mobile.ant.design/zh/components/spin-loading#api)，完整支持所有原生属性。
+
+### 属性
+
+| 属性  | 说明                                              | 类型                                          | 默认值      |
+| ----- | ------------------------------------------------- | --------------------------------------------- | ----------- |
+| color | 线条颜色，等效于手动设置 `--color` CSS 变量       | `'default' \| 'primary' \| 'white' \| string` | `'default'` |
+
+### CSS 变量
+
+| 属性    | 说明     | 默认值                  |
+| ------- | -------- | ----------------------- |
+| --color | 线条颜色 | `var(--adm-color-weak)` |
+| --size  | 大小     | `32px`                  |
+
+---
+
+## 布局（5 个）
+
+### 自动居中 AutoCenter
+
+# 自动居中 AutoCenter
+
+文本自动居中对齐。
+
+## 何时使用
+
+内容不够整行宽度、或达到满宽后使用。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/autocenter-basic.tsx"></code>
+
+## API
+
+继承 antd-mobile [AutoCenterProps](https://mobile.ant.design/zh/components/auto-center#api)，完整支持所有原生属性。
+
+### 属性
+
+MobileAutoCenter 组件继承自原生 HTML `div` 元素，支持所有标准 `div` 属性（如 `className`、`style`、`onClick` 等）。
+
+| 属性     | 说明   | 类型        | 默认值 |
+| -------- | ------ | ----------- | ------ |
+| children | 子元素 | `ReactNode` | -      |
+
+---
+
+### 分割线 Divider
+
+# 分割线 Divider
+
+区隔内容的分割线。
+
+## 何时使用
+
+- 对不同章节的文本段落进行分割。
+- 对行内文字/链接进行分割，例如表格的操作列。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/divider-basic.tsx"></code>
+
+## API
+
+继承 antd-mobile [DividerProps](https://mobile.ant.design/zh/components/divider#api)，完整支持所有原生属性。
+
+### 属性
+
+| 属性           | 说明                                          | 类型                              | 默认值        |
+| -------------- | --------------------------------------------- | --------------------------------- | ------------- |
+| contentPosition | 内容位置，仅在 `direction` 为 `horizontal` 时有效 | `'center' \| 'left' \| 'right'`   | `'center'`    |
+| direction      | 水平还是垂直类型                              | `'horizontal' \| 'vertical'`      | `'horizontal'` |
+
+---
+
+### 栅格 Grid
+
+# 栅格 Grid
+
+用于业务中多个子功能的导航。
+
+## 何时使用
+
+在具有推荐性质较强的页面中作为功能入口使用，例如首页。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/grid-basic.tsx"></code>
+
+## API
+
+继承 antd-mobile [GridProps](https://mobile.ant.design/zh/components/grid#api) / [GridItemProps](https://mobile.ant.design/zh/components/grid#griditem)，完整支持所有原生属性。
+
+### MobileGrid
+
+#### 属性
+
+| 属性    | 说明           | 类型                                                        | 默认值 |
+| ------- | -------------- | ----------------------------------------------------------- | ------ |
+| columns | 列数           | `number`                                                    | -      |
+| gap     | 格子之间的间距 | `number \| string \| [number \| string, number \| string]` | `0`    |
+
+#### CSS 变量
+
+| 属性             | 说明               | 默认值       | 全局变量 |
+| ---------------- | ------------------ | ------------ | -------- |
+| --gap            | 间距大小           | `0`          | -        |
+| --gap-horizontal | 水平方向的间距大小 | `var(--gap)` | -        |
+| --gap-vertical   | 垂直方向的间距大小 | `var(--gap)` | -        |
+
+### MobileGrid.Item
+
+#### 属性
+
+| 属性    | 说明     | 类型                                                                      | 默认值 |
+| ------- | -------- | ------------------------------------------------------------------------- | ------ |
+| onClick | 点击事件 | `(event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void`           | -      |
+| span    | 跨度     | `number`                                                                  | `1`    |
+
+## FAQ
+
+### Grid 组件的兼容性说明
+
+MobileGrid 组件依赖了 CSS Grid 特性，所以兼容性标准是 iOS Safari >= 10.3 和 Chrome >= 57。
+
+---
+
+### 安全区 SafeArea
+
+# 安全区 SafeArea
+
+在全面屏下提供自适应的边距调整。
+
+## 何时使用
+
+当网页被全屏展示时，可借助安全区实现自动适配。
+
+## 说明
+
+MobileSafeArea 组件是用来在全面屏下提供自适应的边距调整，它的底层实现其实是 `env(safe-area-inset-xxx)`。
+
+当你的网页是被全屏展示时，可以借助它来实现自动的适配，下图中蓝色的部分是顶部 SafeArea 所占据的区域，而橙色的部分是底部 SafeArea 所占据的区域。
+
+<img alt="safe-area-top" src="https://gw.alipayobjects.com/mdn/rms_25513e/afts/img/A*ATR3R5FOt9gAAAAAAAAAAAAAARQnAQ" width="500px" />
+
+<img alt="safe-area-bottom" src="https://gw.alipayobjects.com/mdn/rms_25513e/afts/img/A*M9vOS5mUT_AAAAAAAAAAAAAAARQnAQ" width="500px" />
+
+需要注意的是，下方的 demo 在桌面端浏览器下是看不到效果的。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/safeara-basic.tsx"></code>
+
+## API
+
+继承 antd-mobile [SafeAreaProps](https://mobile.ant.design/zh/components/safe-area#api)，完整支持所有原生属性。
+
+### 属性
+
+| 属性     | 说明         | 类型                | 默认值 |
+| -------- | ------------ | ------------------- | ------ |
+| position | 安全区的位置 | `'top' \| 'bottom'` | -      |
+
+### CSS 变量
+
+| 属性       | 说明       | 默认值 | 全局变量                   |
+| ---------- | ---------- | ------ | -------------------------- |
+| --multiple | 显示的倍数 | `1`    | `--adm-safe-area-multiple` |
+
+## FAQ
+
+### 在 rem 布局下，SafeArea 高度很小怎么办？
+
+一些 rem 方案会通过 viewport meta 设置网页的整体缩放，这种情况下，SafeArea 也会被对应的缩放，从而很可能高度异常。这时你可以通过全局的 `--adm-safe-area-multiple` CSS 变量来调整 SafeArea 的显示倍数，例如，如果你的项目框架将页面整体缩放为了 0.5 倍，那么你可以设置 `--adm-safe-area-multiple: 2` 来做对应的补偿调整。
+
+---
+
+### 间距 Space
+
+# 间距 Space
+
+元素排列中保持相同的宽度。
+
+## 何时使用
+
+适用于多个元素按照水平或垂直方向保持相同的间距。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/space-basic.tsx"></code>
+
+## API
+
+继承 antd-mobile [SpaceProps](https://mobile.ant.design/zh/components/space#api)，完整支持所有原生属性。
+
+### 属性
+
+| 属性      | 说明                                            | 类型                                                                                  | 默认值        |
+| --------- | ----------------------------------------------- | ------------------------------------------------------------------------------------- | ------------- |
+| align     | 交叉轴对齐方式                                  | `'start' \| 'end' \| 'center' \| 'baseline'`                                          | -             |
+| block     | 是否渲染为块级元素                              | `boolean`                                                                             | `false`       |
+| direction | 间距方向                                        | `'vertical' \| 'horizontal'`                                                          | `'horizontal'` |
+| justify   | 主轴对齐方式                                    | `'start' \| 'end' \| 'center' \| 'between' \| 'around' \| 'evenly' \| 'stretch'`      | -             |
+| onClick   | 点击事件                                        | `(event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void`                       | -             |
+| wrap      | 是否自动换行，仅在 `horizontal` 时有效          | `boolean`                                                                             | `false`       |
+
+### CSS 变量
+
+| 属性             | 说明               | 默认值       |
+| ---------------- | ------------------ | ------------ |
+| --gap            | 间距大小           | `8px`        |
+| --gap-horizontal | 水平方向的间距大小 | `var(--gap)` |
+| --gap-vertical   | 垂直方向的间距大小 | `var(--gap)` |
+
+---
+
+## 导航（7 个）
+
+### 胶囊选项卡 CapsuleTabs
+
+# 胶囊选项卡 CapsuleTabs
+
+内容组之间进行导航切换。基于 antd-mobile CapsuleTabs 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+选项卡的另外一种样式，用在展示型界面的列表或模块中。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/capsuletabs-basic.tsx"></code>
+
+## API
+
+继承 antd-mobile [CapsuleTabsProps](https://mobile.ant.design/zh/components/capsule-tabs#api)，完整支持以下属性。
+
+### MobileCapsuleTabs
+
+#### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| activeKey | 当前激活 `tab` 面板的 `key` | `string \| null` | - |
+| defaultActiveKey | 初始化选中面板的 `key`，如果没有设置 `activeKey` | `string \| null` | 第一个面板的 `key` |
+| onChange | 切换面板的回调 | `(key: string) => void` | - |
+
+### MobileCapsuleTabs.Tab
+
+#### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| destroyOnClose | 不可见时是否销毁 `DOM` 结构 | `boolean` | `false` |
+| disabled | 是否禁用 | `boolean` | `false` |
+| forceRender | 被隐藏时是否渲染 `DOM` 结构 | `boolean` | `false` |
+| key | 对应 `activeKey` | `string` | - |
+| title | 选项卡头显示文字 | `ReactNode` | - |
+
+MobileCapsuleTabs 的用法和 MobileTabs 非常相似，所以关于更多的用法上的指引，请参阅 [MobileTabs](./mobile-tabs.md) 的文档。
+
+---
+
+### 序列 IndexBar
+
+# 序列 IndexBar
+
+根据字母 A ～ Z 排列内容。基于 antd-mobile IndexBar 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+适用于列表的分类显示和快速定位。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/indexbar-basic.tsx"></code>
+
+## API
+
+继承 antd-mobile [IndexBarProps](https://mobile.ant.design/zh/components/index-bar#api)，完整支持以下属性。
+
+### MobileIndexBar
+
+#### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| onIndexChange | 当锚点变化时回调 | `(index: string) => void` | - |
+| sticky | 是否开启锚点自动吸顶 | `boolean` | `true` |
+
+#### CSS 变量
+
+通过 CSS 变量可自定义索引栏样式，企业主题已统一注入品牌色 `#F95914`。
+
+| 属性 | 说明 | 默认值 | 全局变量 |
+| --- | --- | --- | --- |
+| `--sticky-offset-top` | 锚点自动吸顶时与顶部的距离 | `0` | - |
+
+#### Ref
+
+| 属性 | 说明 | 类型 |
+| --- | --- | --- |
+| `scrollTo` | 滚动到指定锚点 | `(index: string) => void` |
+
+### MobileIndexBar.Panel
+
+#### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| brief | 右侧索引条中的显示内容 | `ReactNode` | 默认取 `index` 的第一个字符 |
+| index | 索引（不可以重复） | `string` | - |
+| title | 左侧主内容区的分组标题 | `ReactNode` | 默认取 `index` |
+
+---
+
+### 复杂选项卡 JumboTabs
+
+# 复杂选项卡 JumboTabs
+
+内容组之间进行导航切换。基于 antd-mobile JumboTabs 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+选项需要有进一步描述时，用在展示型界面的列表或模块中。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/jumbotabs-basic.tsx"></code>
+
+## API
+
+继承 antd-mobile [JumboTabsProps](https://mobile.ant.design/zh/components/jumbo-tabs#api)，完整支持以下属性。
+
+### MobileJumboTabs
+
+#### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| activeKey | 当前激活 `tab` 面板的 `key` | `string \| null` | - |
+| defaultActiveKey | 初始化选中面板的 `key`，如果没有设置 `activeKey` | `string \| null` | 第一个面板的 `key` |
+| onChange | 切换面板的回调 | `(key: string) => void` | - |
+
+### MobileJumboTabs.Tab
+
+#### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| description | 选项卡描述 | `ReactNode` | - |
+| destroyOnClose | 不可见时是否销毁 `DOM` 结构 | `boolean` | `false` |
+| disabled | 是否禁用 | `boolean` | `false` |
+| forceRender | 被隐藏时是否渲染 `DOM` 结构 | `boolean` | `false` |
+| key | 对应 `activeKey` | `string` | - |
+| title | 选项卡头显示文字 | `ReactNode` | - |
+
+MobileJumboTabs 的用法和 MobileTabs 非常相似，所以关于更多的用法上的指引，请参阅 [MobileTabs](./mobile-tabs.md) 的文档。
+
+---
+
+### 导航栏 NavBar
+
+# 导航栏 NavBar
+
+为页面提供全局性的导航功能。基于 antd-mobile NavBar 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+需要显示当前页面内容的标题和操作。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/navbar-basic.tsx"></code>
+
+## API
+
+继承 antd-mobile [NavBarProps](https://mobile.ant.design/zh/components/nav-bar#api)，完整支持以下属性。
+
+### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| back | 返回区域的文字，如果为 `null` 的话，`backIcon` 也不会渲染 | `ReactNode \| null` | `''` |
+| backIcon | 是否显示返回区域的箭头，也可以传入 `ReactNode` 进行自定义 | `boolean \| ReactNode` | `true` |
+| children | 标题 | `ReactNode` | - |
+| left | 左侧内容，渲染在返回区域的右侧 | `ReactNode` | - |
+| onBack | 点击返回区域后的回调 | `() => void` | - |
+| right | 右侧内容 | `ReactNode` | - |
+
+### CSS 变量
+
+通过 CSS 变量可自定义导航栏样式，企业主题已统一注入品牌色 `#F95914`。
+
+| 属性 | 说明 | 默认值 |
+| --- | --- | --- |
+| `--border-bottom` | 导航栏下边框 | `none` |
+| `--height` | 导航栏高度 | `45px` |
+
+---
+
+### 侧边导航 SideBar
+
+# 侧边导航 SideBar
+
+垂直展示导航栏。基于 antd-mobile SideBar 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+需要用户快速导航至某一项内容集合，并可以在多个内容之间来回切换。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/sidebar-basic.tsx"></code>
+
+## API
+
+继承 antd-mobile [SideBarProps](https://mobile.ant.design/zh/components/side-bar#api)，完整支持以下属性。
+
+### MobileSideBar
+
+#### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| activeKey | 当前激活 `item` 的 `key` | `string \| null` | - |
+| defaultActiveKey | 初始化选中 `item` 的 `key`，如果没有设置 `activeKey` | `string \| null` | 第一个 `item` 的 `key` |
+| onChange | 切换面板的回调 | `(key: string) => void` | - |
+
+#### CSS 变量
+
+通过 CSS 变量可自定义侧边导航样式，企业主题已统一注入品牌色 `#F95914`。
+
+| 属性 | 说明 | 默认值 |
+| --- | --- | --- |
+| `--background-color` | 背景颜色 | `#f5f5f5` |
+| `--height` | 侧边导航高度 | `100%` |
+| `--item-border-radius` | 当前激活 `item` 的圆角 | `8px` |
+| `--width` | 侧边导航宽度 | `105px` |
+
+### MobileSideBar.Item
+
+#### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| badge | 徽标 | `BadgeProps['content']` | - |
+| disabled | 是否禁用 | `boolean` | `false` |
+| key | 对应 `activeKey` | `string` | - |
+| title | 显示内容 | `ReactNode` | - |
+
+---
+
+### 标签栏 TabBar
+
+# 标签栏 TabBar
+
+页面底部导航标签。基于 antd-mobile TabBar 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+适用于在不同页面之间进行切换。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/tabbar-basic.tsx"></code>
+
+## API
+
+继承 antd-mobile [TabBarProps](https://mobile.ant.design/zh/components/tab-bar#api)，完整支持以下属性。
+
+### MobileTabBar
+
+#### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| activeKey | 当前激活 `item` 的 `key` | `string \| null` | - |
+| defaultActiveKey | 初始化选中 `item` 的 `key`，如果没有设置 `activeKey` | `string \| null` | 第一个 `TabBar.Item` 的 `key` |
+| onChange | 切换面板的回调 | `(key: string) => void` | - |
+| safeArea | 是否开启安全区适配 | `boolean` | `false` |
+
+### MobileTabBar.Item
+
+#### 属性
+
+| 属性 | 说明 | 类型 | 默认值 | 版本 |
+| --- | --- | --- | --- | --- |
+| badge | 徽标，同 [Badge](https://mobile.ant.design/zh/components/badge) 的 `content` 属性 | `React.ReactNode \| typeof Badge.dot` | - |  |
+| icon | 图标 | `ReactNode \| ((active: boolean) => ReactNode)` | - |  |
+| key | 对应 `activeKey` | `string` | - |  |
+| title | 标题 | `ReactNode \| ((active: boolean) => ReactNode)` | - |  |
+| onClick | 点击事件的回调 | `() => void` | - | 5.38.0 |
+
+## FAQ
+
+### MobileTabBar 为什么不能固定在页面底部？
+
+不同业务项目中的布局逻辑是不一样的，MobileTabBar 本身是不含定位和外层布局相关的逻辑的，需要业务项目中配合 [MobilePopup](./mobile-popup.md) 实现，或者自行用 CSS 实现。
+
+---
+
+### 标签页 Tabs
+
+# 标签页 Tabs
+
+内容组之间进行导航切换。基于 antd-mobile Tabs 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+当前内容需要分成同层级结构的组，进行内容切换展示，常用在表单或者列表的顶部。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/tabs-basic.tsx"></code>
+
+## API
+
+继承 antd-mobile [TabsProps](https://mobile.ant.design/zh/components/tabs#api)，完整支持以下属性。
+
+### MobileTabs
+
+#### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| activeKey | 当前激活 `tab` 面板的 `key` | `string \| null` | - |
+| activeLineMode | 激活 `tab` 下划线的模式 | `'auto' \| 'full' \| 'fixed'` | `'auto'` |
+| defaultActiveKey | 初始化选中面板的 `key`，如果没有设置 `activeKey` | `string \| null` | 第一个面板的 `key` |
+| onChange | 切换面板的回调 | `(key: string) => void` | - |
+| stretch | 选项卡头部是否拉伸 | `boolean` | `true` |
+| direction | 文档排版方向 | `'ltr' \| 'rtl'` | `'ltr'` |
+
+#### CSS 变量
+
+通过 CSS 变量可自定义标签页样式，企业主题已统一注入品牌色 `#F95914`。
+
+| 属性 | 说明 | 默认值 |
+| --- | --- | --- |
+| `--active-line-border-radius` | 当前激活 `tab` 下划线的圆角 | `var(--active-line-height)` |
+| `--active-line-color` | 当前激活 `tab` 下划线的颜色 | `var(--adm-color-primary)` |
+| `--active-line-height` | 当前激活 `tab` 下划线的高度 | `2px` |
+| `--active-title-color` | 当前激活 `tab` 选项文字颜色 | `var(--adm-color-primary)` |
+| `--content-padding` | `tab` 内容区的 `padding` | `12px` |
+| `--fixed-active-line-width` | 当前激活 `tab` 下划线的宽度，仅在 `activeLineMode` 为 `'fixed'` 时有效 | `30px` |
+| `--title-font-size` | 选项卡头文字的大小 | `17px` |
+
+### MobileTabs.Tab
+
+#### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| destroyOnClose | 不可见时是否销毁 `DOM` 结构 | `boolean` | `false` |
+| disabled | 是否禁用 | `boolean` | `false` |
+| forceRender | 被隐藏时是否渲染 `DOM` 结构 | `boolean` | `false` |
+| key | 对应 `activeKey` | `string` | - |
+| title | 选项卡头显示文字 | `ReactNode` | - |
+
+## FAQ
+
+### MobileTabs 是否支持 sticky 吸顶效果？
+
+支持，但是 MobileTabs 并没有一个类似于 `sticky` 的属性。你可以自己在 MobileTabs 的外层容器中增加一下 `position: sticky` 的 CSS 样式，从而实现吸顶效果。
+
+### MobileTabs 怎么配合 MobileSwiper、MobilePullToRefresh、MobileInfiniteScroll 实现一个复杂的信息流界面？
+
+可以参考 antd-mobile 官方提供的这个 [demo](https://codesandbox.io/s/mystifying-glitter-knpc7u?file=/src/components/getPullToRefreshlData.tsx)，将 `Tabs` / `Swiper` / `PullToRefresh` / `InfiniteScroll` 替换为对应的 `Mobile` 前缀封装组件即可。
+
+### MobileTabs.Tab 关于 key 的类型问题
+
+因为 `React` 内部会把传入的 `key` 转为 `string`，所以这里 `key` 的类型其实只要是符合 `React.Key` 都是可以的。
+
+---
+
+## 信息录入（24 个）
+
+### 级联选择视图 CascadePickerView
+
+# 级联选择视图 CascadePickerView
+
+直接渲染在页面中的级联选择器视图。基于 antd-mobile CascadePickerView 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+适用于作为表单项直接嵌入到页面中的级联选择场景，选项数据是二维数组的形式。如果需要弹窗形式，请使用 `MobileCascadePicker`。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/cascadepickerview-basic.tsx"></code>
+
+## API
+
+继承 antd-mobile [CascadePickerViewProps](https://mobile.ant.design/zh/components/cascade-picker-view#api)，完整支持以下属性。
+
+### CascadePickerOption
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| disabled | 是否禁用 | `boolean` | `false` |
+| label | 文字 | `ReactNode` | - |
+| value | 值 | `string \| number \| null` | - |
+| options | 子级选项 | `PickerColumnItem[]` | - |
+| title | 列标题 | `ReactNode` | - |
+
+### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| defaultValue | 默认值 | `PickerValue[]` | `[]` |
+| mouseWheel | 是否支持通过鼠标滚轮进行选择 | `boolean` | `false` |
+| onChange | 选项改变时触发 | `(value: PickerValue[], extend: PickerValueExtend) => void` | - |
+| options | 配置每一列的选项数据 | `CascadePickerOption[]` | `[]` |
+| renderLabel | 自定义渲染每一项的展示内容 | `(item: PickerColumnItem, index: number) => ReactNode` | - |
+| value | 选中项 | `PickerValue[]` | - |
+
+### CSS 变量
+
+| 属性 | 说明 | 默认值 |
+| --- | --- | --- |
+| `--height` | 整个组件的高度 | `240px` |
+| `--item-height` | 每个选项的高度 | `34px` |
+| `--item-font-size` | 选项字体大小 | `16px` |
+| `--active-color` | 选中状态下文字的颜色 | `var(--adm-color-primary)` |
+| `--inactive-color` | 非选中状态下文字的颜色 | `var(--adm-color-weak)` |
+| `--mask-color` | 上下遮罩的颜色 | `var(--adm-color-white)` |
+| `--mask-opacity` | 上下遮罩的不透明度 | `0.6` |
+
+---
+
+### 级联选择器 CascadePicker
+
+# 级联选择器 CascadePicker
+
+级联选择器，常用于分组的多列数据选择。基于 antd-mobile CascadePicker 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+当需要选择的数据是多列且每列的数据之间有一定关联时使用，选项数据是二维数组的形式。相比 `CascadePickerView`，它是以弹窗的形式出现的。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/cascadepicker-basic.tsx"></code>
+
+## API
+
+继承 antd-mobile [CascadePickerProps](https://mobile.ant.design/zh/components/cascade-picker#api)，完整支持以下属性。
+
+### CascadePickerOption
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| disabled | 是否禁用 | `boolean` | `false` |
+| label | 文字 | `ReactNode` | - |
+| value | 值 | `string \| number \| null` | - |
+| options | 子级选项 | `PickerColumnItem[]` | - |
+| title | 列标题 | `ReactNode` | - |
+
+### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| cancelText | 取消按钮的文字 | `string` | `'取消'` |
+| confirmText | 确定按钮的文字 | `string` | `'确定'` |
+| defaultValue | 默认值 | `PickerValue[]` | - |
+| destroyOnClose | 关闭时是否销毁内容 | `boolean` | `false` |
+| mouseWheel | 是否支持通过鼠标滚轮进行选择 | `boolean` | `false` |
+| onCancel | 取消时触发 | `() => void` | - |
+| onClose | 关闭时触发 | `() => void` | - |
+| onConfirm | 确认时触发 | `(value: PickerValue[], extend: PickerValueExtend) => void` | - |
+| onPickerChange | 选项改变时触发 | `(value: PickerValue[], extend: PickerValueExtend) => void` | - |
+| options | 配置每一列的选项数据 | `CascadePickerOption[]` | - |
+| placeholder | 未选中时的提示文案 | `string` | `'请选择'` |
+| popupClassName | 弹层 className | `string` | - |
+| popupStyle | 弹层 style | `React.CSSProperties` | - |
+| renderLabel | 自定义渲染每一项的展示内容 | `(item: PickerColumnItem, index: number) => ReactNode` | - |
+| title | 标题 | `ReactNode` | - |
+| value | 选中项 | `PickerValue[]` | - |
+| visible | 是否可见 | `boolean` | `false` |
+
+### CSS 变量
+
+| 属性 | 说明 | 默认值 |
+| --- | --- | --- |
+| `--header-height` | 头部高度 | `48px` |
+| `--title-font-size` | 标题字号 | `15px` |
+| `--item-font-size` | 选项字号 | `16px` |
+| `--item-active-color` | 选中状态下的文字颜色 | `var(--adm-color-primary)` |
+| `--item-inactive-color` | 非选中状态下的文字颜色 | `var(--adm-color-weak)` |
+| `--height` | 选择区域高度 | `240px` |
+| `--item-height` | 每个选项的高度 | `34px` |
+| `--mask-color` | 上下遮罩的颜色 | `var(--adm-color-white)` |
+| `--mask-opacity` | 上下遮罩的不透明度 | `0.6` |
+
+---
+
+### 级联视图 CascaderView
+
+# 级联视图 CascaderView
+
+直接渲染在页面中的级联选择器，而不是作为弹窗。基于 antd-mobile CascaderView 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+适用于作为表单项直接嵌入到页面中的级联选择场景（例如省市区），不占用弹层。如果需要弹窗形式的级联选择器，请使用 `MobileCascader`。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/cascaderview-basic.tsx"></code>
+
+## API
+
+继承 antd-mobile [CascaderViewProps](https://mobile.ant.design/zh/components/cascader-view#api)，完整支持以下属性。
+
+### CascaderValue / CascaderValueExtend
+
+```typescript
+type CascaderValue = string | number;
+
+type CascaderValueExtend = {
+  items: (CascaderOption | null)[];
+  isLeaf: boolean;
+};
+```
+
+### CascaderOption
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| disabled | 是否禁用 | `boolean` | `false` |
+| isLeaf | 是否是叶子节点 | `boolean` | `true` |
+| label | 文字 | `ReactNode` | - |
+| value | 值 | `string \| number` | - |
+| children | 子级选项 | `CascaderOption[]` | - |
+
+### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| defaultValue | 默认值 | `CascaderValue[]` | `[]` |
+| onChange | 选项改变时触发 | `(value: CascaderValue[], extend: CascaderValueExtend) => void` | - |
+| onLoadOptions | 动态加载子选项 | `(option: CascaderOption \| null) => Promise<void>` | - |
+| options | 数据源 | `CascaderOption[]` | `[]` |
+| renderItem | 自定义渲染每个选项的内容 | `(item: CascaderOption, level: number) => ReactNode` | - |
+| title | 标题 | `ReactNode` | - |
+| value | 选中项 | `CascaderValue[]` | - |
+
+### CSS 变量
+
+| 属性 | 说明 | 默认值 |
+| --- | --- | --- |
+| `--height` | 整个组件的高度 | `240px` |
+| `--item-height` | 每个选项的高度 | `34px` |
+| `--item-font-size` | 选项字体大小 | `16px` |
+| `--active-color` | 选中状态下文字的颜色 | `var(--adm-color-primary)` |
+| `--inactive-color` | 非选中状态下文字的颜色 | `var(--adm-color-weak)` |
+| `--mask-color` | 上下遮罩的颜色 | `var(--adm-color-white)` |
+| `--mask-opacity` | 上下遮罩的不透明度 | `0.6` |
+
+---
+
+### 级联选择 Cascader
+
+# 级联选择 Cascader
+
+级联选择器，用于多层级级联数据的表单项选择。基于 antd-mobile Cascader 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+用于一组有着递进关系的数据的选择，例如省市区选择。相比 `CascaderView`，它是以弹窗的形式出现的，并且能更好地和 `Form` 组件配合使用。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/cascader-basic.tsx"></code>
+
+## API
+
+继承 antd-mobile [CascaderProps](https://mobile.ant.design/zh/components/cascader#api)，完整支持以下属性。
+
+### CascaderValue / CascaderValueExtend
+
+```typescript
+type CascaderValue = string | number;
+
+type CascaderValueExtend = {
+  items: (CascaderOption | null)[];
+  isLeaf: boolean;
+};
+```
+
+### CascaderOption
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| disabled | 是否禁用 | `boolean` | `false` |
+| isLeaf | 是否是叶子节点 | `boolean` | `true` |
+| label | 文字 | `ReactNode` | - |
+| value | 值 | `string \| number` | - |
+| children | 子级选项 | `CascaderOption[]` | - |
+
+### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| cancelText | 取消按钮的文字 | `string` | `'取消'` |
+| confirmText | 确定按钮的文字 | `string` | `'确定'` |
+| defaultValue | 默认值 | `CascaderValue[]` | - |
+| destroyOnClose | 关闭时是否销毁内容 | `boolean` | `false` |
+| forceRender | 强制渲染内容 | `boolean` | `false` |
+| onCancel | 取消时触发 | `() => void` | - |
+| onClose | 关闭时触发 | `() => void` | - |
+| onConfirm | 确认时触发 | `(value: CascaderValue[], extend: CascaderValueExtend) => void` | - |
+| onItemsChange | 选项变化时触发 | `(items: (CascaderOption \| null)[]) => void` | - |
+| onLoadOptions | 动态加载子选项 | `(option: CascaderOption \| null) => Promise<void>` | - |
+| onSelect | 选项改变时触发 | `(value: CascaderValue[], extend: CascaderValueExtend) => void` | - |
+| options | 数据源 | `CascaderOption[]` | - |
+| placeholder | 未选中时的提示文案 | `string` | `'请选择'` |
+| popupClassName | 弹层 className | `string` | - |
+| popupStyle | 弹层 style | `React.CSSProperties` | - |
+| renderItem | 自定义渲染每个选项的内容 | `(item: CascaderOption, level: number) => ReactNode` | - |
+| title | 标题 | `ReactNode` | - |
+| value | 选中项 | `CascaderValue[]` | - |
+| visible | 是否可见 | `boolean` | `false` |
+
+### CSS 变量
+
+| 属性 | 说明 | 默认值 |
+| --- | --- | --- |
+| `--header-height` | 头部高度 | `48px` |
+| `--title-font-size` | 标题字号 | `15px` |
+| `--item-font-size` | 选项字号 | `16px` |
+| `--item-active-color` | 选中状态下的文字颜色 | `var(--adm-color-primary)` |
+| `--item-active-background` | 选中状态下的背景颜色 | `var(--adm-color-weak)` |
+| `--item-disabled-color` | 禁用状态下的文字颜色 | `var(--adm-color-text-disabled)` |
+| `--height` | 选择区域高度 | `240px` |
+| `--item-height` | 每个选项的高度 | `34px` |
+| `--mask-color` | 上下遮罩的颜色 | `var(--adm-color-white)` |
+| `--mask-opacity` | 上下遮罩的不透明度 | `0.6` |
+
+---
+
+### 可勾选列表 CheckList
+
+# 可勾选列表 CheckList
+
+在 List 基础上扩展的可勾选列表组件，提供多选/单选能力。基于 antd-mobile CheckList 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+适用于在一组有标题或描述的选项中进行选择，相比 `Checkbox` 和 `Radio`，CheckList 更适合以列表的形式展示带描述文字的选项。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/checklist-basic.tsx"></code>
+
+## API
+
+继承 antd-mobile [CheckListProps](https://mobile.ant.design/zh/components/check-list#api)，完整支持以下属性。
+
+### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| defaultValue | 默认项 | `Value[]` | `[]` |
+| disabled | 是否整体禁用 | `boolean` | `false` |
+| multiple | 是否允许多选 | `boolean` | `true` |
+| onChange | 选项改变时触发 | `(value: Value[]) => void` | - |
+| readOnly | 是否整体只读 | `boolean` | `false` |
+| value | 选中项 | `Value[]` | - |
+
+### CheckList.Item
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| description | 描述 | `ReactNode` | - |
+| disabled | 是否禁用 | `boolean` | `false` |
+| readOnly | 是否只读 | `boolean` | `false` |
+| value | 该项的值 | `Value` | - |
+
+此外，还支持 `List.Item` 的所有原生属性（如 `prefix`、`extra`、`onClick`、`arrow` 等）。
+
+### CSS 变量
+
+| 属性 | 说明 | 默认值 |
+| --- | --- | --- |
+| `--border-inner` | 每一项之间的边框 | `solid 1px var(--adm-color-border)` |
+| `--border-top` | 顶部的边框 | `solid 1px var(--adm-color-border)` |
+| `--border-bottom` | 底部的边框 | `solid 1px var(--adm-color-border)` |
+| `--border-radius` | 圆角大小 | `8px` |
+| `--padding-left` | 左侧内边距 | `12px` |
+| `--padding-right` | 右侧内边距 | `12px` |
+| `--active-background-color` | 按下时的背景色 | `var(--adm-color-fill-content)` |
+| `--extra-max-width` | 右侧 `extra` 的最大宽度 | `70%` |
+| `--icon-size` | 勾选图标的大小 | `22px` |
+| `--checked-icon-color` | 勾选时图标的颜色 | `var(--adm-color-primary)` |
+| `--disabled-icon-color` | 禁用状态下勾选图标的颜色 | `var(--adm-color-text-disabled)` |
+
+---
+
+### 复选框 Checkbox
+
+# 复选框 Checkbox
+
+在一组可选项中进行多项选择时。基于 antd-mobile Checkbox 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+在一组可选项中进行多项选择时。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/checkbox-basic.tsx"></code>
+
+## API
+
+### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| block | 是否渲染为块级元素 | `boolean` | `false` |
+| checked | 指定当前是否选中 | `boolean` | `false` |
+| defaultChecked | 初始是否选中 | `boolean` | `false` |
+| disabled | 是否禁用 | `boolean` | `false` |
+| icon | 自定义图标 | `(checked: boolean) => ReactNode` | - |
+| indeterminate | 设置 indeterminate 状态，只负责样式控制 | `boolean` | `false` |
+| onChange | 变化时回调函数 | `(checked: boolean) => void` | - |
+
+此外还支持以下原生属性：`onClick` `onMouseEnter` `onMouseLeave`。
+
+### Checkbox.Group
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| defaultValue | 默认选中项 | `string[]` | - |
+| disabled | 整组失效 | `boolean` | `false` |
+| onChange | 变化回调函数 | `(value: string[]) => void` | - |
+| value | 指定选中的选项 | `string[]` | - |
+
+### Checkbox.Icon
+
+无需布局，只显示图标本身，常用于列表等自定义场景。
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| checked | 指定当前是否选中 | `boolean` | `false` |
+| defaultChecked | 初始是否选中 | `boolean` | `false` |
+| disabled | 是否禁用 | `boolean` | `false` |
+| icon | 自定义图标 | `(checked: boolean) => ReactNode` | - |
+| indeterminate | 设置 indeterminate 状态 | `boolean` | `false` |
+| onChange | 变化时回调函数 | `(checked: boolean) => void` | - |
+
+### CSS 变量
+
+| 属性 | 说明 | 默认值 |
+| --- | --- | --- |
+| `--disabled-color` | 禁用状态下的文字颜色 | `var(--adm-color-weak)` |
+| `--font-size` | 字号 | `17px` |
+| `--gap` | 文字和图标之间的距离 | `8px` |
+| `--icon-size` | 图标大小 | `22px` |
+
+---
+
+### 日期选择视图 DatePickerView
+
+# 日期选择视图 DatePickerView
+
+直接渲染在页面中的日期选择器，而不是作为弹窗。基于 antd-mobile DatePickerView 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+适用于作为表单项直接嵌入到页面中的日期选择场景，不占用弹层。如果需要弹窗形式的日期选择器，请使用 `MobileDatePicker`。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/datepickerview-basic.tsx"></code>
+
+## API
+
+继承 antd-mobile [DatePickerViewProps](https://mobile.ant.design/zh/components/date-picker-view#api)，完整支持以下属性。
+
+### DatePickerPrecision
+
+```typescript
+type DatePickerPrecision =
+  | "year"
+  | "month"
+  | "day"
+  | "hour"
+  | "minute"
+  | "second"
+  | "week"
+  | "week-day"
+  | "quarter";
+```
+
+### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| columnChildren | 自定义列的 `children`，配合 `renderLabel` 的实现 | `ReactNode[]` | - |
+| defaultValue | 默认值 | `Date` | - |
+| filter | 过滤可选日期，函数返回 `true` 时表示该日期可选 | `(date: Date, type: Precision) => boolean` | - |
+| max | 最大值 | `Date` | `10 年后` |
+| min | 最小值 | `Date` | `10 年前` |
+| mouseWheel | 是否支持通过鼠标滚轮进行选择 | `boolean` | `false` |
+| onChange | 值变化时触发 | `(value: Date) => void` | - |
+| precision | 精度 | `DatePickerPrecision` | `'day'` |
+| renderLabel | 自定义渲染每一列的展示内容 | `(type: Precision, data: number) => ReactNode` | - |
+| tillNow | 是否展示"至今"选项 | `boolean` | `false` |
+| value | 当前值 | `Date` | - |
+
+### CSS 变量
+
+| 属性 | 说明 | 默认值 |
+| --- | --- | --- |
+| `--height` | 整个组件的高度 | `240px` |
+| `--item-height` | 每个选项的高度 | `34px` |
+| `--item-font-size` | 选项字体大小 | `16px` |
+| `--active-color` | 选中状态下文字的颜色 | `var(--adm-color-primary)` |
+| `--inactive-color` | 非选中状态下文字的颜色 | `var(--adm-color-weak)` |
+| `--mask-color` | 上下遮罩的颜色 | `var(--adm-color-white)` |
+| `--mask-opacity` | 上下遮罩的不透明度 | `0.6` |
+
+---
+
+### 日期选择器 DatePicker
+
+# 日期选择器 DatePicker
+
+提供年 / 月 / 日 / 时 / 分的选择。基于 antd-mobile DatePicker 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+当用户需要输入一个时间，可以将日期时间选择器作为补充。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/datepicker-basic.tsx"></code>
+
+## API
+
+### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| defaultValue | 默认值 | `Date` | - |
+| value | 选中项 | `Date` | - |
+| precision | 精度 | `'year' \| 'month' \| 'day' \| 'hour' \| 'minute' \| 'second' \| 'week' \| 'week-day'` | `'day'` |
+| min | 最小值 | `Date` | `十年前` |
+| max | 最大值 | `Date` | `十年后` |
+| title | 顶部标题 | `ReactNode` | - |
+| confirmText | 确定按钮的文字 | `string` | `确定` |
+| cancelText | 取消按钮的文字 | `string` | `取消` |
+| visible | 是否显示选择器 | `boolean` | `false` |
+| destroyOnClose | 关闭时是否销毁内容 | `boolean` | `false` |
+| forceRender | 强制渲染内容 | `boolean` | `false` |
+| loading | 是否加载中 | `boolean` | `false` |
+| loadingContent | 加载中内容 | `ReactNode` | `<SpinLoading />` |
+| onConfirm | 确定按钮的回调 | `(value, extend) => void` | - |
+| onCancel | 取消按钮的回调 | `() => void` | - |
+| onClose | 关闭时触发 | `() => void` | - |
+| onSelect | 选项变化时触发 | `(value, extend) => void` | - |
+| renderLabel | 自定义渲染每一列的展示内容 | `(type: DatePickerColumnType, data: number) => ReactNode` | - |
+| filter | 过滤可供选择的时间列表 | `(type: DatePickerColumnType, data: number) => boolean` | - |
+| mouseWheel | 是否允许通过鼠标滚轮进行选择 | `boolean` | `false` |
+| popup | 是否弹层形式显示 | `boolean` | `true` |
+| popupClassName | 弹层 classname | `string` | - |
+| popupStyle | 弹层样式 | `React.CSSProperties` | - |
+
+### 方法
+
+通过命令式调用 `MobileDatePicker.prompt` 可以直接弹出选择器，返回 Promise，点击确定会返回当前所选值：
+
+```ts
+const value = await MobileDatePicker.prompt(props);
+```
+
+### Ref
+
+| 属性 | 说明 | 类型 |
+| --- | --- | --- |
+| `confirm` | 确认选择 | `() => void` |
+| `open` | 打开选择器 | `() => void` |
+| `close` | 关闭选择器 | `() => void` |
+| `toggle` | 切换显隐 | `(visible?: boolean) => void` |
+| `setOptions` | 设置选项 | `(options) => void` |
+| `value` | 当前选中值 | `Date \| null` |
+
+### CSS 变量
+
+| 属性 | 说明 | 默认值 |
+| --- | --- | --- |
+| `--header-button-font-size` | 头部按钮字号 | `15px` |
+| `--title-font-size` | 标题字号 | `15px` |
+| `--item-font-size` | 选项字号 | `16px` |
+| `--item-height` | 选项高度 | `34px` |
+| `--active-indicator-color` | 蒙层背景色 | `var(--adm-color-background)` |
+| `--active-indicator-border-color` | 蒙层边框颜色 | `var(--adm-color-border)` |
+| `--active-indicator-border-radius` | 蒙层圆角 | `8px` |
+| `--active-indicator-border-style` | 蒙层边框样式 | `solid` |
+| `--active-indicator-border-width` | 蒙层边框宽度 | `1px` |
+| `--wheel-animation-duration` | 滚轮动画时长 | `300ms` |
+
+---
+
+### 表单 Form
+
+# 表单 Form
+
+具有数据收集、校验和提交功能的表单，包含复选框、单选框、输入框、选择框等。基于 antd-mobile Form 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+用于创建、编辑或提交数据。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/form-basic.tsx"></code>
+
+## API
+
+### Form
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| form | 经 `Form.useForm()` 创建的 form 实例 | `FormInstance` | - |
+| initialValues | 表单默认值 | `Record<string, any>` | - |
+| name | 表单名称 | `string` | - |
+| layout | 表单布局 | `'horizontal' \| 'vertical'` | `'horizontal'` |
+| mode | 表单模式 | `'default' \| 'card'` | `'default'` |
+| disabled | 是否禁用表单内的所有控件 | `boolean` | `false` |
+| requiredMarkStyle | 必填标记的样式 | `'asterisk' \| 'text-required' \| 'text-mark' \| 'none'` | `'asterisk'` |
+| moneyMode | 是否启用金额模式 | `boolean` | `false` |
+| footer | 表单尾部 | `ReactNode` | - |
+| extra | 表单额外的尾部 | `ReactNode` | - |
+| onValuesChange | 任一表单域的值发生改变时的回调 | `(changedValues, allValues) => void` | - |
+
+### Form.Item
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| childElementPosition | 子元素的位置 | `'left' \| 'right' \| 'center'` | `'left'` |
+| dependencies | 设置依赖字段 | `NamePath[]` | - |
+| disabled | 是否禁用 | `boolean` | `false` |
+| extra | 额外展示的内容 | `ReactNode` | - |
+| hasFeedback | 是否展示校验反馈图标 | `boolean` | `false` |
+| help | 提示信息 | `ReactNode` | - |
+| hidden | 是否隐藏 | `boolean` | `false` |
+| initialValue | 设置子元素默认值 | `any` | - |
+| label | 标签 | `ReactNode` | - |
+| messageVariables | 默认验证提示信息变量 | `Record<string, string>` | - |
+| name | 字段名 | `NamePath` | - |
+| noStyle | 不使用样式 | `boolean` | `false` |
+| required | 是否必填 | `boolean` | `false` |
+| rules | 校验规则 | `Rule[]` | - |
+| tooltip | 配置提示信息 | `ReactNode` | - |
+| trigger | 收集子节点的值的时机 | `string` | `'onChange'` |
+| validateTrigger | 设置字段校验的时机 | `string \| string[]` | `'onChange'` |
+| valuePropName | 子节点的值的属性 | `string` | `'value'` |
+| onClick | 点击事件 | `(event, formRef) => void` | - |
+
+### Form.Header
+
+表单的标题，常用来做表单的分组。
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| children | 内容 | `ReactNode` | - |
+
+### Form.Subscribe
+
+用于监听表单字段的变化。
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| to | 要监听的字段名数组 | `NamePath[]` | - |
+| children | 渲染函数 | `(changedValues, form) => ReactNode` | - |
+
+### Form.Array
+
+用于动态增减表单项。
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| name | 字段名 | `NamePath` | - |
+| onAdd | 新增时的回调 | `(operation) => void` | - |
+| renderHeader | 渲染头部 | `(meta, operation) => ReactNode` | - |
+| renderAdd | 渲染新增按钮 | `() => ReactNode` | - |
+| children | 渲染函数 | `(fields, operation) => ReactNode` | - |
+
+### Form.useForm
+
+创建表单实例，用于表单数据的读写：
+
+```ts
+const [form] = MobileForm.useForm();
+```
+
+| 实例方法 | 说明 |
+| --- | --- |
+| `getFieldValue(name)` | 获取指定字段的值 |
+| `getFieldsValue()` | 获取所有字段的值 |
+| `getFieldError(name)` | 获取指定字段的错误信息 |
+| `getFieldsError()` | 获取所有字段的错误信息 |
+| `isFieldTouched(name)` | 检查指定字段是否被操作过 |
+| `isFieldsTouched()` | 检查任意字段是否被操作过 |
+| `resetFields()` | 重置所有字段 |
+| `setField(name, value)` | 设置指定字段的值 |
+| `setFieldsValue(values)` | 设置多个字段的值 |
+| `setFieldsError(errors)` | 设置多个字段的错误信息 |
+| `setInitialValues(values)` | 设置初始值 |
+| `submit()` | 提交表单 |
+| `validateFields()` | 校验所有字段 |
+| `validateFields(names)` | 校验指定字段 |
+
+### CSS 变量
+
+| 属性 | 说明 | 默认值 |
+| --- | --- | --- |
+| `--border-inner` | `Form.Item` 的内部边框 | `solid 1px var(--adm-color-border)` |
+| `--border-top` | 整个 `Form` 的顶部边框 | `solid 1px var(--adm-color-border)` |
+| `--border-bottom` | 整个 `Form` 的底部边框 | `solid 1px var(--adm-color-border)` |
+| `--prefix-width` | `Form.Item` 标签的宽度 | `6em` |
+| `--content-padding` | `Form.Item` 文本内容的 padding | `12px 0` |
+| `--content-text-align` | `Form.Item` 文本内容的对齐方式 | `left` |
+| `--header-color` | `Form.Header` 文本的颜色 | `var(--adm-color-weak)` |
+| `--header-font-size` | `Form.Header` 文本的字号 | `15px` |
+| `--footer-color` | `Form.Footer` 文本的颜色 | `var(--adm-color-weak)` |
+| `--footer-font-size` | `Form.Footer` 文本的字号 | `13px` |
+
+### FAQ
+
+**自定义校验？**
+
+可以参考 [rc-field-form#rule](https://github.com/react-component/field-form#rule) 的 API。
+
+---
+
+### 图片上传 ImageUploader
+
+# 图片上传 ImageUploader
+
+用于将图片上传到服务器。基于 antd-mobile ImageUploader 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+当用户需要在移动端上传一张或多张图片时使用，常用于头像上传、凭证上传、图片反馈等场景。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/imageuploader-basic.tsx"></code>
+
+## API
+
+继承 antd-mobile [ImageUploaderProps](https://mobile.ant.design/zh/components/image-uploader#api)，完整支持以下属性。
+
+### ImageUploadItem
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| key | 唯一标识 | `string \| number` | - |
+| status | 上传状态 | `'loading' \| 'done' \| 'error'` | `'done'` |
+| thumbnailUrl | 缩略图 URL（可选） | `string` | - |
+| url | 图片地址 | `string` | - |
+
+### TaskStatus
+
+```typescript
+type TaskStatus = 'pending' | 'fail' | 'success';
+```
+
+### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| accept | 接收的文件类型 | `string` | `'image/*'` |
+| autoUpload | 是否在选取文件后自动上传，如果设置为 `false`，那么需要手动调用 `upload` | `boolean` | `true` |
+| beforeUpload | 在选择图片之后的钩子，如果返回 `false` / `Promise<false>` 则终止上传，返回 `File` 则替换上传的文件 | `(file: File, files: File[]) => boolean \| File \| Promise<boolean \| File>` | - |
+| children | 自定义上传按钮 | `ReactNode` | 默认的上传图标 |
+| defaultValue | 默认的文件列表 | `ImageUploadItem[]` | `[]` |
+| deleteIcon | 删除图标的 ReactNode | `ReactNode` | - |
+| disableUpload | 是否禁用上传按钮，如果为 `true`，那么点击上传按钮不会触发系统文件选择 | `boolean` | `false` |
+| maxCount | 最多上传图片数量，到达或超出这个数量后，会隐藏上传按钮 | `number` | `0` |
+| maxSize | 单张图片最大尺寸，超出后 `onSizeError` 会被触发，尺寸单位为字节 `B` | `number` | `Number.MAX_SAFE_INTEGER` |
+| multiple | 是否支持多选上传 | `boolean` | `false` |
+| onDelete | 当用户点击删除图标时的钩子函数，如果返回的 `Promise` 被 `reject` 的话，就不会从列表中移除 | `(item: ImageUploadItem, index: number) => Promise<void> \| void` | - |
+| onCountExceed | 当用户选择的图片数量超出 `maxCount` 限制时触发 | `(exceed: number) => void` | - |
+| onChange | 当图片列表发生变化时触发 | `(items: ImageUploadItem[]) => void` | - |
+| onSizeError | 当图片大小超过 `maxSize` 时触发 | `(size: number) => void` | - |
+| onUploadQueueChange | 上传队列发生变化时触发 | `(tasks: UploadTask[]) => void` | - |
+| preview | 是否在点击图片时预览 | `boolean` | `true` |
+| showFailed | 是否在列表中展示上传失败的图片 | `boolean` | `true` |
+| showUpload | 是否展示上传按钮 | `boolean` | `true` |
+| upload | 上传函数，接收 `File` 对象，需要返回一个 `Promise`，`resolve` 的值是图片的 URL | `(file: File) => Promise<ImageUploadItem \| string>` | - |
+| value | 文件列表 | `ImageUploadItem[]` | - |
+
+### CSS 变量
+
+| 属性 | 说明 | 默认值 |
+| --- | --- | --- |
+| `--cell-size` | 单个图片的尺寸 | `80px` |
+| `--gap` | 图片之间的间距 | `12px` |
+| `--border-radius` | 图片圆角 | `8px` |
+| `--delete-icon-size` | 删除图标的大小 | `20px` |
+| `--upload-mask-color` | 上传遮罩颜色 | `rgba(0, 0, 0, 0.5)` |
+| `--failed-color` | 失败状态文字颜色 | `var(--adm-color-danger)` |
+
+---
+
+### 输入框 Input
+
+# 输入框 Input
+
+通过键盘输入内容，是最基础的表单域包装。基于 antd-mobile Input 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+一般用在表单页进行信息的收集，提供文本框、选择框两种类型。
+
+Input 组件是布局无关的，它只包括了最基本的输入框部分，如果你想为它增加边框、标题、或是一些操作按钮，可以配合 `MobileList` 或 `MobileForm` 组件使用。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/input-basic.tsx"></code>
+
+## API
+
+### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| clearable | 是否启用清除图标，点击清除图标后会清空输入框 | `boolean` | `false` |
+| defaultValue | 默认值 | `string` | - |
+| disabled | 是否禁用 | `boolean` | `false` |
+| id | input 元素的 id，常用来配合 label 使用 | `string` | - |
+| max | 最大值，仅在 type 为 number 时生效 | `number` | - |
+| min | 最小值，仅在 type 为 number 时生效 | `number` | - |
+| onChange | 输入框内容变化时触发 | `(value: string) => void` | - |
+| onClear | 点击清除按钮后触发 | `() => void` | - |
+| onEnterPress | 按下回车的回调 | `(e: React.KeyboardEvent<HTMLInputElement>) => void` | - |
+| onlyShowClearWhenFocus | 如果 `true`，那么只有输入框聚焦时才会显示清除按钮；如果为 `false`，那么输入框失去焦点后依旧会显示清除按钮 | `boolean` | `true` |
+| placeholder | 提示文本 | `string` | - |
+| readOnly | 是否只读 | `boolean` | `false` |
+| value | 输入值 | `string` | - |
+
+此外还支持以下原生属性：`maxLength` `minLength` `autoComplete` `autoFocus` `enterKeyHint` `pattern` `inputMode` `type` `onFocus` `onBlur` `autoCapitalize` `autoCorrect` `onKeyDown` `onKeyUp` `onCompositionStart` `onCompositionEnd` `onClick` `step`。
+
+### CSS 变量
+
+| 属性 | 说明 | 默认值 |
+| --- | --- | --- |
+| `--color` | 文字颜色 | `var(--adm-color-text)` |
+| `--font-size` | 字号 | `17px` |
+| `--placeholder-color` | placeholder 文字颜色 | `var(--adm-color-light)` |
+| `--text-align` | 文字对齐方式 | `left` |
+
+### Ref
+
+| 属性 | 说明 | 类型 |
+| --- | --- | --- |
+| `blur` | 让输入框失去焦点 | `() => void` |
+| `clear` | 清空输入内容 | `() => void` |
+| `focus` | 让输入框获得焦点 | `() => void` |
+| `nativeElement` | 原始 input 元素 | `HtmlInputElement \| null` |
+
+### FAQ
+
+**当 type 为 number 时，maxLength 限制为什么没有生效？**
+
+在原生 input 中，maxlength 只在 type 为 text、search、url、tel、email、password 时生效，请参考 MDN 上的文档。如果需要对 number 类型的输入框进行限制，可以通过 max、min 属性。
+
+**在 iOS 下，当我使用输入法输入文字时，点击清除按钮，为什么有时候会导致输入框失去焦点？**
+
+这是预期行为，具体原因请查阅相关 issue。
+
+**在 iOS 下，为什么设置了 autoFocus 还是不能自动获取焦点？**
+
+这是预期行为，因为 iOS 系统对聚焦有限制。
+
+---
+
+### 数字键盘 NumberKeyboard
+
+# 数字键盘 NumberKeyboard
+
+虚拟的数字键盘，配合密码输入框或验证码输入框使用。基于 antd-mobile NumberKeyboard 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+当需要在移动端通过虚拟键盘输入数字时使用，常用于金额输入、密码输入、验证码输入等场景。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/numberkeyboard-basic.tsx"></code>
+
+## API
+
+继承 antd-mobile [NumberKeyboardProps](https://mobile.ant.design/zh/components/number-keyboard#api)，完整支持以下属性。
+
+### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| closeOnConfirm | 是否在点击确认按钮时关闭键盘 | `boolean` | `true` |
+| confirmText | 确认按钮的文字 | `string` | - |
+| customKey | 自定义键盘左下角和右下角的按键内容，最大长度为 2，可以是单个值或数组 | `string \| [string, string]` | - |
+| deleteText | 删除按键的文本 | `ReactNode` | `'删除'` |
+| onBlur | 键盘失焦时触发 | `() => void` | - |
+| onClose | 键盘关闭时触发 | `() => void` | - |
+| onConfirm | 点击确认按钮时触发 | `() => void` | - |
+| onDelete | 点击删除按键时触发 | `() => void` | - |
+| onInput | 点击数字按键时触发 | `(key: string) => void` | - |
+| randomOrder | 是否对数字按键进行随机排序 | `boolean` | `false` |
+| showHeader | 是否展示顶部的关闭按钮 | `boolean` | `false` |
+| title | 顶部标题 | `ReactNode` | - |
+| value | 当前值（仅用于展示，不用于控制） | `string` | - |
+| visible | 是否可见 | `boolean` | `false` |
+
+### Ref
+
+| 属性 | 说明 | 类型 |
+| --- | --- | --- |
+| `blur` | 失去焦点 | `() => void` |
+| `focus` | 获取焦点 | `() => void` |
+
+### CSS 变量
+
+| 属性 | 说明 | 默认值 |
+| --- | --- | --- |
+| `--z-index` | z-index | `1000` |
+| `--header-height` | 头部高度 | `34px` |
+| `--confirm-text-color` | 确认按钮文字颜色 | `var(--adm-color-primary)` |
+| `--key-padding-vertical` | 按键上下内边距 | `12px` |
+| `--key-font-size` | 按键字号 | `22px` |
+| `--key-border-radius` | 按键圆角 | `8px` |
+| `--key-background-color` | 按键背景色 | `var(--adm-color-background)` |
+| `--key-active-background-color` | 按键按下时的背景色 | `var(--adm-color-fill-content)` |
+| `--delete-color` | 删除按键图标颜色 | `var(--adm-color-weak)` |
+| `--confirm-background` | 确认区域背景色 | `var(--adm-color-background)` |
+
+---
+
+### 密码输入 PasscodeInput
+
+# 密码输入 PasscodeInput
+
+密码/验证码输入框，常配合数字键盘使用。基于 antd-mobile PasscodeInput 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+用于输入密码、短信验证码、支付验证码等固定长度的数字内容场景。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/passcodeinput-basic.tsx"></code>
+
+## API
+
+继承 antd-mobile [PasscodeInputProps](https://mobile.ant.design/zh/components/passcode-input#api)，完整支持以下属性。
+
+### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| autoComplete | 浏览器自动填充时使用 | `string` | `'one-time-code'` |
+| defaultValue | 默认值 | `string` | `''` |
+| disabled | 是否禁用 | `boolean` | `false` |
+| error | 是否报错，报错的情况下会展示报错的红点 | `boolean` | `false` |
+| keyboard | 自定义键盘 | `ReactElement` | - |
+| length | 密码/验证码的长度 | `number` | `6` |
+| onBlur | 失焦时触发 | `() => void` | - |
+| onChange | 值改变时触发 | `(value: string) => void` | - |
+| onFill | 输入满指定长度时触发 | `(value: string) => void` | - |
+| onFocus | 聚焦时触发 | `() => void` | - |
+| plain | 是否展示明文 | `boolean` | `false` |
+| separated | 是否用分隔符分隔每个输入位 | `boolean` | `false` |
+| value | 当前值 | `string` | - |
+
+此外，还支持原生 `input` 元素的以下属性：`autoFocus` `name` `required` `pattern` 等。
+
+### Ref
+
+| 属性 | 说明 | 类型 |
+| --- | --- | --- |
+| `blur` | 失去焦点 | `() => void` |
+| `focus` | 获取焦点 | `() => void` |
+
+### CSS 变量
+
+| 属性 | 说明 | 默认值 |
+| --- | --- | --- |
+| `--dot-color` | 密码点的颜色 | `var(--adm-color-text)` |
+| `--dot-size` | 密码点的尺寸 | `10px` |
+| `--border-color` | 边框颜色 | `var(--adm-color-border)` |
+| `--border-radius` | 圆角 | `8px` |
+| `--cell-size` | 每个输入位的尺寸 | `40px` |
+| `--gap` | 输入位之间的间距 | `8px` |
+| `--active-border-color` | 聚焦时的边框颜色 | `var(--adm-color-primary)` |
+| `--error-color` | 错误状态的颜色 | `var(--adm-color-danger)` |
+| `--caret-color` | 光标颜色 | `var(--adm-color-primary)` |
+
+---
+
+### 选择器视图 PickerView
+
+# 选择器视图 PickerView
+
+直接渲染在页面中的选择器，而不是作为弹窗。基于 antd-mobile PickerView 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+适用于作为表单项直接嵌入到页面中的场景，不占用弹层。如果需要弹窗形式的选择器，请使用 `MobilePicker`。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/pickerview-basic.tsx"></code>
+
+## API
+
+继承 antd-mobile [PickerViewProps](https://mobile.ant.design/zh/components/picker-view#api)，完整支持以下属性。
+
+### PickerValue / PickerValueExtend
+
+```typescript
+type PickerValue = string | number | null;
+
+type PickerValueExtend = {
+  columns: PickerColumn[];
+  items: (PickerColumnItem | null)[];
+};
+```
+
+### PickerColumnItem
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| key | 该选项的唯一标识，如果不配置，会取 `value` 作为 key | `string \| number` | - |
+| label | 该选项的展示文本 | `ReactNode` | - |
+| value | 该选项的值 | `string \| number \| null` | - |
+| disabled | 是否禁用 | `boolean` | `false` |
+
+### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| columns | 配置每一列的选项数据 | `PickerColumn[] \| ((value: PickerValue[]) => PickerColumn[])` | `[]` |
+| defaultValue | 默认选项 | `PickerValue[]` | `[]` |
+| mouseWheel | 是否支持通过鼠标滚轮进行选择 | `boolean` | `false` |
+| onChange | 选项改变时触发 | `(value: PickerValue[], extend: PickerValueExtend) => void` | - |
+| renderLabel | 自定义渲染每一项的展示内容 | `(item: PickerColumnItem, index: number) => ReactNode` | - |
+| value | 选中项 | `PickerValue[]` | - |
+
+### CSS 变量
+
+| 属性 | 说明 | 默认值 |
+| --- | --- | --- |
+| `--height` | 整个组件的高度 | `240px` |
+| `--item-height` | 每个选项的高度 | `34px` |
+| `--item-font-size` | 选项字体大小 | `16px` |
+| `--active-color` | 选中状态下文字的颜色 | `var(--adm-color-primary)` |
+| `--inactive-color` | 非选中状态下文字的颜色 | `var(--adm-color-weak)` |
+| `--mask-color` | 上下遮罩的颜色 | `var(--adm-color-white)` |
+| `--mask-opacity` | 上下遮罩的不透明度 | `0.6` |
+
+---
+
+### 选择器 Picker
+
+# 选择器 Picker
+
+一组关联字段供用户选择，常用于选择省市区、时间等。基于 antd-mobile Picker 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+- 表单中需要从一组预设选项中选择一个或多个值时。
+- 不宜用下拉菜单展示的较多选项（如省市联动）。
+- 需要命令式快速弹出选择器时，可使用 `MobilePicker.prompt`。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/picker-basic.tsx"></code>
+
+### 命令式调用
+
+通过 `MobilePicker.prompt` 以命令式 API 打开选择器，返回 Promise，无需手动管理 visible 状态。
+
+<code src="./demos/picker-prompt.tsx"></code>
+
+### 级联联动与自定义
+
+`columns` 支持函数形式，根据已选值动态返回列，实现级联联动。`renderLabel` 可自定义每项渲染内容。
+
+<code src="./demos/picker-advanced.tsx"></code>
+
+## API
+
+继承 antd-mobile [PickerProps](https://mobile.ant.design/zh/components/picker#api)，完整支持所有原生属性。
+
+### PickerProps
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| columns | 配置每一列的选项数据，支持函数形式实现联动 | `PickerColumn[] \| ((value: PickerValue[]) => PickerColumn[])` | - |
+| value | 选中项 | `PickerValue[]` | - |
+| defaultValue | 默认选中项 | `PickerValue[]` | - |
+| loading | 是否处于加载状态 | `boolean` | `false` |
+| loadingContent | 加载状态下展示的内容 | `ReactNode` | `<SpinLoading />` |
+| onSelect | 选中项变化时触发 | `(value: PickerValue[], extend: PickerValueExtend) => void` | - |
+| onConfirm | 点击确认按钮时触发 | `(value: PickerValue[], extend: PickerValueExtend) => void` | - |
+| onCancel | 点击取消按钮时触发 | `() => void` | - |
+| onClose | 选择器关闭时触发 | `() => void` | - |
+| closeOnMaskClick | 点击蒙层是否关闭 | `boolean` | `true` |
+| visible | 是否显示选择器 | `boolean` | `false` |
+| title | 标题 | `ReactNode` | - |
+| confirmText | 确认按钮的文字 | `ReactNode` | `'确认'` |
+| cancelText | 取消按钮的文字 | `ReactNode` | `'取消'` |
+| children | 渲染触发区域，接收当前选中项与操作方法 | `(items: (PickerColumnItem \| null)[], actions: PickerActions) => ReactNode` | - |
+| renderLabel | 自定义每列选项的渲染内容 | `(item: PickerColumnItem) => ReactNode` | - |
+| mouseWheel | 是否支持通过鼠标滚轮进行选择，通常用于桌面端 | `boolean` | `false` |
+| popupClassName | 弹层类名 | `string` | - |
+| popupStyle | 弹层样式 | `CSSProperties` | - |
+
+此外，还继承以下 `PopupProps`：`getContainer` `afterShow` `afterClose` `onClick` `stopPropagation` `forceRender` `destroyOnClose`。
+
+### PickerActions（Ref）
+
+通过 ref 获取，用于命令式控制选择器的打开和关闭。
+
+| 属性 | 说明 | 类型 |
+| --- | --- | --- |
+| open | 打开选择器 | `() => void` |
+| close | 关闭选择器 | `() => void` |
+| toggle | 切换选择器打开/关闭状态 | `() => void` |
+
+### CSS 变量
+
+| 属性 | 说明 | 默认值 |
+| --- | --- | --- |
+| `--header-button-font-size` | 头部按钮（确认/取消）字号 | `15px` |
+| `--title-font-size` | 标题字号 | `15px` |
+| `--item-font-size` | 选项字号 | `16px` |
+| `--item-height` | 选项高度 | `34px` |
+
+### 方法
+
+#### MobilePicker.prompt
+
+以命令式调用方式打开选择器，返回 Promise，resolve 的值为选中的 `PickerValue[]`（用户取消时为 `null`）。
+
+```ts | pure
+const value = await MobilePicker.prompt({
+  title: "请选择",
+  columns: [
+    [{ label: "选项一", value: "1" }, { label: "选项二", value: "2" }],
+  ],
+});
+```
+
+#### 参数
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| `_omit_` | 接受除 `value` `visible` `children` 外的全部 PickerProps | `Omit<PickerProps, 'value' \| 'visible' \| 'children'>` | - |
+
+#### 返回值
+
+| 类型 | 说明 |
+| --- | --- |
+| `Promise<PickerValue[] \| null>` | 用户点确认时返回选中值数组；点取消/关闭时返回 `null` |
+
+### 类型定义
+
+#### PickerValue
+
+```ts | pure
+type PickerValue = string \| null;
+```
+
+#### PickerColumnItem
+
+```ts | pure
+interface PickerColumnItem {
+  label: ReactNode;
+  value: string;
+  key?: string;
+}
+```
+
+#### PickerColumn
+
+```ts | pure
+type PickerColumn = PickerColumnItem[];
+```
+
+#### PickerValueExtend
+
+```ts | pure
+interface PickerValueExtend {
+  columns: PickerColumn[];
+  items: (PickerColumnItem \| null)[];
+}
+```
+
+## FAQ
+
+### 如何实现级联联动？
+
+将 `columns` 设为函数，函数会收到当前选中值数组，你可以根据已选值动态返回新的列数据：
+
+```tsx | pure
+<MobilePicker
+  columns={(value) => {
+    // value[0] 是第一列的已选值
+    return [
+      firstColumn,
+      getSecondColumnByFirst(value[0]),
+    ];
+  }}
+/>
+```
+
+### 如何让选择器直接显示而不需要点击触发？
+
+设置 `visible` 属性为 `true`，通常配合受控状态使用：
+
+```tsx | pure
+const [visible, setVisible] = useState(true);
+<MobilePicker visible={visible} onClose={() => setVisible(false)} columns={columns} />
+```
+
+### children 渲染函数和 visible 声明式哪个更好？
+
+- `children` 渲染函数：无需自己管理 visible 状态，适合简单场景，组件自动处理弹出逻辑。
+- `visible` 声明式：状态完全由外部控制，适合需要在其他逻辑中（如表单提交后）关闭选择器的场景。
+
+---
+
+### 单选框 Radio
+
+# 单选框 Radio
+
+用于在多个可选项中进行单选。基于 antd-mobile Radio 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+用于在多个互斥的备选项中选中单个状态。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/radio-basic.tsx"></code>
+
+## API
+
+### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| block | 是否渲染为块级元素 | `boolean` | `false` |
+| checked | 指定当前是否选中 | `boolean` | `false` |
+| defaultChecked | 初始是否选中 | `boolean` | `false` |
+| disabled | 是否禁用 | `boolean` | `false` |
+| icon | 自定义图标 | `(checked: boolean) => ReactNode` | - |
+| onChange | 变化时回调函数 | `(checked: boolean) => void` | - |
+
+此外还支持以下原生属性：`onClick` `onMouseEnter` `onMouseLeave`。
+
+### Radio.Group
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| defaultValue | 默认选中项 | `string \| null` | - |
+| disabled | 整组失效 | `boolean` | `false` |
+| onChange | 选项变化时的回调函数 | `(value: string \| null) => void` | - |
+| value | 指定选中的选项 | `string \| null` | - |
+
+### Radio.Icon
+
+无需布局，只显示图标本身，常用于列表等自定义场景。
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| checked | 指定当前是否选中 | `boolean` | `false` |
+| defaultChecked | 初始是否选中 | `boolean` | `false` |
+| disabled | 是否禁用 | `boolean` | `false` |
+| icon | 自定义图标 | `(checked: boolean) => ReactNode` | - |
+| onChange | 变化时回调函数 | `(checked: boolean) => void` | - |
+
+### CSS 变量
+
+| 属性 | 说明 | 默认值 |
+| --- | --- | --- |
+| `--disabled-color` | 禁用状态下的文字颜色 | `var(--adm-color-weak)` |
+| `--font-size` | 字号 | `17px` |
+| `--gap` | 文字和图标之间的距离 | `8px` |
+| `--icon-size` | 图标大小 | `22px` |
+
+---
+
+### 评分 Rate
+
+# 评分 Rate
+
+用于对事物进行快速评价打分。基于 antd-mobile Rate 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+当用户需要对某个对象进行满意度、质量、服务态度等评价打分时使用。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/rate-basic.tsx"></code>
+
+## API
+
+继承 antd-mobile [RateProps](https://mobile.ant.design/zh/components/rate#api)，完整支持以下属性。
+
+### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| allowHalf | 是否允许半选 | `boolean` | `false` |
+| allowClear | 是否允许再次点击后清除 | `boolean` | `true` |
+| character | 自定义字符 | `ReactNode` | `<Star />` |
+| count | star 总数 | `number` | `5` |
+| defaultValue | 默认值 | `number` | `0` |
+| disabled | 只读，无法进行交互 | `boolean` | `false` |
+| onChange | 当前分数变化时触发 | `(value: number) => void` | - |
+| readOnly | 只读，无法进行交互（与 `disabled` 等效） | `boolean` | `false` |
+| value | 当前分数 | `number` | - |
+
+### CSS 变量
+
+| 属性 | 说明 | 默认值 |
+| --- | --- | --- |
+| `--star-size` | 每个星的大小 | `24px` |
+| `--active-color` | 激活状态下的颜色 | `#F95914` |
+| `--inactive-color` | 非激活状态下的颜色 | `#e5e5e5` |
+| `--gap` | 星之间的间距 | `4px` |
+
+---
+
+### 搜索框 SearchBar
+
+# 搜索框 SearchBar
+
+用于搜索场景的输入框。基于 antd-mobile SearchBar 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+用于在页面中搜索内容或数据，通常放置在页面顶部或导航栏下方。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/searchbar-basic.tsx"></code>
+
+## API
+
+继承 antd-mobile [SearchBarProps](https://mobile.ant.design/zh/components/search-bar#api)，完整支持以下属性。
+
+### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| cancelText | 取消按钮文字 | `string` | `'取消'` |
+| clearable | 是否启用清除图标，点击清除图标后会清空 `value` | `boolean` | `true` |
+| clearOnCancel | 在点击取消按钮时清空内容 | `boolean` | `true` |
+| defaultValue | 默认值 | `string` | - |
+| disabled | 是否禁用 | `boolean` | `false` |
+| icon | 最左侧的图标 | `ReactNode` | `<SearchOutline />` |
+| maxLength | 最多允许输入的字符个数 | `number` | - |
+| onBlur | 失焦时触发 | `(e: React.FocusEvent<HTMLInputElement>) => void` | - |
+| onCancel | 点击取消按钮时触发 | `() => void` | - |
+| onChange | 输入框内容变化时触发 | `(value: string) => void` | - |
+| onClear | 点击清除按钮后触发 | `() => void` | - |
+| onEnterPress | 按下回车键时触发 | `(e: React.KeyboardEvent<HTMLInputElement>) => void` | - |
+| onFocus | 聚焦时触发 | `(e: React.FocusEvent<HTMLInputElement>) => void` | - |
+| onSearch | 输入时或者是点击搜索按钮时触发 | `(value: string) => void` | - |
+| placeholder | 提示文本 | `string` | - |
+| readOnly | 是否只读 | `boolean` | `false` |
+| rightIcon | 在搜索框最右侧的图标 | `ReactNode` | - |
+| searchText | 搜索按钮的文字 | `string` | `'搜索'` |
+| showCancelButton | 是否在搜索框右侧显示取消按钮，可配合 `onCancel` 使用 | `boolean \| ((focus: boolean) => boolean)` | `false` |
+| value | 当前值 | `string` | - |
+| onlyShowSearchWhenFocus | 只有当 `focus` 时才显示搜索按钮（仅当设置了 `showCancelButton` 时生效） | `boolean` | `true` |
+
+此外，还支持原生 `input` 元素的以下属性：`onMouseEnter` `onMouseLeave` `onClick` `autoFocus` `autoComplete` `enterKeyHint` `inputMode` `name` `pattern` `required` `size` `type` 等。
+
+### Ref
+
+| 属性 | 说明 | 类型 |
+| --- | --- | --- |
+| `blur` | 取消焦点 | `() => void` |
+| `clear` | 清空输入框内容 | `() => void` |
+| `focus` | 获取焦点 | `() => void` |
+
+### CSS 变量
+
+| 属性 | 说明 | 默认值 |
+| --- | --- | --- |
+| `--background` | 背景色 | `var(--adm-color-box)` |
+| `--border-radius` | 圆角 | `6px` |
+| `--placeholder-color` | placeholder 文字颜色 | `var(--adm-color-weak)` |
+| `--height` | 组件高度 | `32px` |
+| `--color` | 文字颜色 | `var(--adm-color-text)` |
+| `--icon-size` | 图标大小 | `16px` |
+| `--padding-left` | 左侧内边距 | `8px` |
+| `--cancel-color` | 取消按钮文字颜色 | `var(--adm-color-primary)` |
+| `--cancel-font-size` | 取消按钮字号 | `15px` |
+
+---
+
+### 选择组 Selector
+
+# 选择组 Selector
+
+在一组选项中选择一个或多个。基于 antd-mobile Selector 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+用于在有限的几个选项之间进行单选或多选，比如筛选条件、标签选择、状态切换等场景。相比 `Radio` 和 `Checkbox`，Selector 更适合平铺的选项展示。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/selector-basic.tsx"></code>
+
+## API
+
+继承 antd-mobile [SelectorProps](https://mobile.ant.design/zh/components/selector#api)，完整支持以下属性。
+
+### Selector.Option
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| description | 描述 | `ReactNode` | - |
+| disabled | 是否禁用 | `boolean` | `false` |
+| label | 文字 | `ReactNode` | - |
+| value | 值 | `string \| number` | - |
+
+### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| columns | 列数 | `number` | - |
+| defaultValue | 默认项 | `Value[]` | `[]` |
+| disabled | 是否整体禁用 | `boolean` | `false` |
+| fieldProps | 透传给底层 `Field` 的属性 | `FieldProps` | - |
+| multiple | 是否允许多选 | `boolean` | `false` |
+| onChange | 选项改变时触发 | `(v: Value[], extend: { items: SelectorOption<Value>[] }) => void` | - |
+| options | 选项列表 | `SelectorOption<Value>[]` | `[]` |
+| renderItem | 自定义每个选项的渲染内容 | `(item: SelectorOption<Value>, active: boolean) => ReactNode` | - |
+| showCheckMark | 是否显示勾选图标 | `boolean` | `true` |
+| value | 选中项 | `Value[]` | - |
+
+### CSS 变量
+
+| 属性 | 说明 | 默认值 |
+| --- | --- | --- |
+| `--color` | 选项文字颜色 | `var(--adm-color-text)` |
+| `--color-disabled` | 禁用状态下的文字颜色 | `var(--adm-color-text-disabled)` |
+| `--background` | 选项背景色 | `var(--adm-color-fill-content)` |
+| `--checked-color` | 选中时的文字颜色 | `var(--adm-color-primary)` |
+| `--checked-background` | 选中时的背景色 | `var(--adm-color-weak)` |
+| `--border` | 边框 | `1px solid var(--adm-color-border)` |
+| `--border-radius` | 圆角 | `4px` |
+| `--gap` | 选项之间的间距 | `8px` |
+
+---
+
+### 滑动输入条 Slider
+
+# 滑动输入条 Slider
+
+滑动型输入器，展示当前值和可选范围。基于 antd-mobile Slider 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+当用户需要在数值区间/自定义区间内进行选择时，可为连续或离散值。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/slider-basic.tsx"></code>
+
+## API
+
+继承 antd-mobile [SliderProps](https://mobile.ant.design/zh/components/slider#api)，完整支持以下属性。
+
+### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| defaultValue | 默认值 | `number \| [number, number]` | `range ? [0, 0] : 0` |
+| disabled | 是否禁用 | `boolean` | `false` |
+| icon | 滑块的图标 | `ReactNode \| ((value: number) => ReactNode)` | - |
+| marks | 刻度标记 | `{ [key: number]: React.ReactNode }` | - |
+| max | 最大值 | `number` | `100` |
+| min | 最小值 | `number` | `0` |
+| onAfterChange | 与 `touchend` 触发时机一致，把当前值作为参数传入 | `(value: number \| [number, number]) => void` | - |
+| onChange | 拖拽滑块时触发，并把当前拖拽的值作为参数传入 | `(value: number \| [number, number]) => void` | - |
+| popover | 是否在拖动时显示悬浮提示，支持传入函数自定义渲染内容 | `boolean \| ((value: number) => ReactNode)` | `false` |
+| residentPopover | `popover` 是否常驻显示，`popover` 存在时生效 | `boolean` | `false` |
+| range | 是否为双滑块 | `boolean` | `false` |
+| step | 步距，取值必须大于 0，并且 `(max - min)` 可被 `step` 整除。当 `marks` 不为空对象时，`step` 的配置失效 | `number` | `1` |
+| ticks | 是否显示刻度 | `boolean` | `false` |
+| value | 当前值 | `number \| [number, number]` | - |
+
+### CSS 变量
+
+| 属性 | 说明 | 默认值 |
+| --- | --- | --- |
+| `--fill-color` | 填充颜色 | `var(--adm-color-primary)` |
+| `--handle-width` | 滑块宽度 | `24px` |
+| `--handle-height` | 滑块高度 | `24px` |
+| `--track-height` | 轨道高度 | `4px` |
+| `--rail-color` | 轨道背景色 | `var(--adm-color-light)` |
+| `--ticks-color` | 刻度颜色 | `var(--adm-color-light)` |
+| `--marks-color` | 刻度标记文字颜色 | `var(--adm-color-weak)` |
+
+---
+
+### 步进器 Stepper
+
+# 步进器 Stepper
+
+通过加减按钮在指定范围内调整数值。基于 antd-mobile Stepper 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+当用户需要在一段数值区间内进行连续或离散选择，并且需要精确数值控制时使用。适用于商品数量、人数、金额等数值录入场景。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/stepper-basic.tsx"></code>
+
+## API
+
+继承 antd-mobile [StepperProps](https://mobile.ant.design/zh/components/stepper#api)，完整支持以下属性。
+
+### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| allowEmpty | 是否允许内容为空，为 `true` 时空白输入框不会回填 `min` | `boolean` | `false` |
+| defaultValue | 默认值 | `number \| string` | `0` |
+| digits | 格式化到小数点后指定位数，设为 0 时去掉小数部分。优先级高于 `step` 的小数点精度 | `number` | - |
+| disabled | 是否禁用 | `boolean` | `false` |
+| disableInput | 输入框只读，不可输入 | `boolean` | `false` |
+| formatter | 格式化展示数值，函数返回值将直接展示在输入框中 | `(value: number) => string` | - |
+| inputMode | 输入框类型 | `'decimal' \| 'numeric'` | `'decimal'` |
+| max | 最大值 | `number` | `Infinity` |
+| min | 最小值 | `number` | `-Infinity` |
+| onChange | 值变化时触发 | `(value: number \| string \| null) => void` | - |
+| parser | 将输入框的字符串解析为数值，和 `formatter` 是逆操作，搭配使用 | `(text: string) => number` | - |
+| size | 尺寸 | `'mini' \| 'small' \| 'middle' \| 'large'` | `'middle'` |
+| step | 每次增减的步长 | `number` | `1` |
+| value | 当前值 | `number \| string` | - |
+
+此外，还支持原生 `input` 元素的以下属性：`onFocus` `onBlur`。
+
+### CSS 变量
+
+| 属性 | 说明 | 默认值 |
+| --- | --- | --- |
+| `--adm-color-primary` | 品牌主色，用于加号按钮、减号按钮激活态 | `#F95914` |
+| `--background-color` | 输入框背景色 | `var(--adm-color-background)` |
+| `--border` | 整体外边框 | `none` |
+| `--border-inner` | 按钮和输入框之间的分隔边框 | `1px solid var(--adm-color-border)` |
+| `--border-radius` | 整体圆角 | `2px` |
+| `--button-background-color` | 加减按钮背景色 | `var(--adm-color-fill-content)` |
+| `--button-text-color` | 加减按钮文字图标颜色 | `var(--adm-color-primary)` |
+| `--height` | 组件整体高度 | 对应 `size` 的默认值 |
+| `--input-background-color` | 中间输入框背景色 | `var(--adm-color-background)` |
+| `--input-font-color` | 输入框文字颜色 | `var(--adm-color-text)` |
+| `--input-font-size` | 输入框字号 | 对应 `size` 的默认值 |
+| `--input-width` | 输入框宽度 | `52px` |
+
+### 方法
+
+通过 `ref` 可以获取到组件内部的方法调用：
+
+| 属性 | 说明 | 类型 |
+| --- | --- | --- |
+| `blur` | 移除焦点 | `() => void` |
+| `focus` | 获取焦点 | `() => void` |
+
+---
+
+### 开关 Switch
+
+# 开关 Switch
+
+用于在打开和关闭状态之间进行切换。基于 antd-mobile Switch 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+需要表示开关状态 / 两种状态之间的切换时。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/switch-basic.tsx"></code>
+
+## API
+
+### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| checked | 指定当前是否选中 | `boolean` | `false` |
+| defaultChecked | 初始是否选中 | `boolean` | `false` |
+| disabled | 是否禁用 | `boolean` | `false` |
+| loading | 加载中的开关 | `boolean` | `false` |
+| onChange | 变化时的回调函数 | `(checked: boolean) => void` | - |
+| beforeChange | 在变化前进行拦截，返回 `true` 则放行，返回 `false` 则拦截，返回 Promise 表示异步处理（异常也会被拦截） | `(checked: boolean) => boolean \| Promise<boolean> \| Promise<void>` | - |
+| checkedText | 选中时的内容，设置为 string 时会自动添加一个圆形的背景 | `ReactNode` | - |
+| uncheckedText | 非选中时的内容，设置为 string 时会自动添加一个圆形的背景 | `ReactNode` | - |
+
+### CSS 变量
+
+| 属性 | 说明 | 默认值 |
+| --- | --- | --- |
+| `--checked-color` | 开启状态的背景颜色 | `var(--adm-color-primary)` |
+| `--height` | Switch 的高度 | `32px` |
+| `--width` | Switch 的宽度 | `51px` |
+| `--border` | Switch 的边框 | - |
+| `--transition-duration` | transition-duration | `300ms` |
+
+---
+
+### 文本域 TextArea
+
+# 文本域 TextArea
+
+通过键盘输入内容，是最基础的表单域包装。基于 antd-mobile TextArea 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+需要折行的长文本输入。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/textarea-basic.tsx"></code>
+
+## API
+
+### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| autoSize | 自适应内容高度 | `boolean \| { minRows?: number, maxRows?: number }` | `false` |
+| defaultValue | 默认值 | `string` | - |
+| id | textarea 元素的 id，常用来配合 label 使用 | `string` | - |
+| maxLength | 最大字符数 | `number` | - |
+| onChange | 文本域内容变化时触发 | `(value: string) => void` | - |
+| placeholder | 提示文本 | `string` | - |
+| rows | 行数 | `number` | `2` |
+| showCount | 显示字数，支持自定义渲染 | `boolean \| ((length: number, maxLength?: number) => ReactNode)` | `false` |
+| value | 输入值 | `string` | - |
+
+此外还支持以下原生属性：`autoComplete` `autoFocus` `disabled` `readOnly` `onFocus` `onBlur` `onCompositionStart` `onCompositionEnd` `onClick`。
+
+### CSS 变量
+
+| 属性 | 说明 | 默认值 |
+| --- | --- | --- |
+| `--color` | 文字颜色 | `var(--adm-color-text)` |
+| `--count-text-align` | 统计文字对齐方式 | `right` |
+| `--disabled-color` | 禁用状态下的文字颜色 | `var(--adm-color-weak)` |
+| `--font-size` | 字号 | `17px` |
+| `--placeholder-color` | placeholder 文字颜色 | `var(--adm-color-light)` |
+| `--text-align` | 文字对齐方式 | `left` |
+
+### Ref
+
+| 属性 | 说明 | 类型 |
+| --- | --- | --- |
+| `blur` | 让输入框失去焦点 | `() => void` |
+| `clear` | 清空输入内容 | `() => void` |
+| `focus` | 让输入框获得焦点 | `() => void` |
+| `nativeElement` | 原始 text-area 元素 | `HTMLTextAreaElement \| null` |
+
+---
+
+### 虚拟输入 VirtualInput
+
+# 虚拟输入 VirtualInput
+
+虚拟输入框，可以配合各种自定义的键盘使用。基于 antd-mobile VirtualInput 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+当系统自带的输入法不能满足业务需求时使用，常配合 `NumberKeyboard` 等自定义键盘组件一起使用，避免触发系统原生键盘。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/virtualinput-basic.tsx"></code>
+
+## API
+
+继承 antd-mobile [VirtualInputProps](https://mobile.ant.design/zh/components/virtual-input#api)，完整支持以下属性。
+
+### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| clearable | 是否启用清除图标，点击清除图标后会清空 `value` | `boolean` | `false` |
+| defaultValue | 默认值 | `string` | `''` |
+| disabled | 是否禁用 | `boolean` | `false` |
+| keyboard | 自定义键盘 | `ReactElement` | - |
+| onBlur | 失焦时触发 | `() => void` | - |
+| onChange | 值变化时触发 | `(value: string) => void` | - |
+| onClear | 点击清除按钮后触发 | `() => void` | - |
+| onFocus | 聚焦时触发 | `() => void` | - |
+| placeholder | 提示文本 | `string` | - |
+| prefix | 前缀 | `ReactNode` | - |
+| readOnly | 是否只读 | `boolean` | `false` |
+| value | 当前值 | `string` | - |
+
+### Ref
+
+| 属性 | 说明 | 类型 |
+| --- | --- | --- |
+| `blur` | 失去焦点 | `() => void` |
+| `focus` | 获取焦点 | `() => void` |
+
+### CSS 变量
+
+| 属性 | 说明 | 默认值 |
+| --- | --- | --- |
+| `--font-size` | 字号 | `17px` |
+| `--color` | 文字颜色 | `var(--adm-color-text)` |
+| `--placeholder-color` | placeholder 文字颜色 | `var(--adm-color-weak)` |
+| `--text-align` | 文字对齐方式 | `left` |
+| `--height` | 组件高度 | `48px` |
+| `--padding-left` | 左侧内边距 | `12px` |
+| `--cursor-width` | 光标宽度 | `2px` |
+| `--cursor-color` | 光标颜色 | `var(--adm-color-primary)` |
+| `--cursor-height` | 光标高度 | `1em` |
+| `--cursor-interval` | 光标闪烁的时间间隔 | `1s` |
+
+---
+
+## 信息展示（16 个）
+
+### 头像 Avatar
+
+# 头像 Avatar
+
+头像组件，基于 antd-mobile Avatar 封装，支持图片加载失败占位、嵌套徽标等能力。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/avatar-basic.tsx"></code>
+
+## API
+
+| 属性     | 说明                                 | 类型                                          | 默认值 |
+| -------- | ------------------------------------ | --------------------------------------------- | ------ |
+| children | 子元素，通常用来嵌套 MobileBadge     | ReactNode                                     | -      |
+| fallback | 图片加载失败的占位内容               | ReactNode                                     | -      |
+| fit      | 图片填充模式                         | `'contain' \| 'cover' \| 'fill' \| 'none' \| 'scale-down'` | - |
+| src      | 图片地址                             | string                                        | -      |
+
+## CSS 变量
+
+| 属性            | 说明     | 默认值 |
+| --------------- | -------- | ------ |
+| --size          | 头像尺寸 | `40px` |
+| --border-radius | 圆角大小 | `50%`  |
+
+---
+
+### 卡片 Card
+
+# 卡片 Card
+
+通用卡片容器，可承载文字、列表、图片、段落等，便于用户浏览内容。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/card-basic.tsx"></code>
+
+## API
+
+| 属性          | 说明                 | 类型                                                                | 默认值 |
+| ------------- | -------------------- | ------------------------------------------------------------------- | ------ |
+| bodyClassName | body 自定义类名      | string                                                              | -      |
+| bodyStyle     | body 自定义样式      | `React.CSSProperties`                                               | -      |
+| extra         | header 右边区域      | ReactNode                                                           | -      |
+| headerClassName | header 自定义类名  | string                                                              | -      |
+| headerStyle   | header 自定义样式    | `React.CSSProperties`                                               | -      |
+| onBodyClick   | body 区域点击事件    | `(event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void`     | -      |
+| onClick       | 卡片点击事件         | `(event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void`     | -      |
+| onHeaderClick | header 区域点击事件  | `(event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void`     | -      |
+| title         | header 左边区域      | ReactNode                                                           | -      |
+
+## CSS 变量
+
+| 属性                            | 说明               | 默认值                        | 全局变量                       |
+| ------------------------------- | ------------------ | ----------------------------- | ------------------------------ |
+| --adm-card-border-radius        | 圆角大小           | `8px`                         | `--adm-card-border-radius`     |
+| --adm-card-padding-inline       | 水平内边距         | `12px`                        | `--adm-card-padding-inline`    |
+| --adm-card-header-border-width  | header 分割线宽度  | `0.5px`                       | `--adm-card-header-border-width` |
+| --adm-card-header-border-color  | header 分割线颜色  | `var(--adm-color-border)`     | `--adm-card-header-border-color` |
+| --adm-card-header-padding-block | header 垂直内边距  | `12px`                        | `--adm-card-header-padding-block` |
+| --adm-card-body-padding-block   | body 垂直内边距    | `12px`                        | `--adm-card-body-padding-block` |
+
+---
+
+### 折叠面板 Collapse
+
+# 折叠面板 Collapse
+
+可以折叠/展开的内容区域。对复杂区域进行分组和隐藏，保持页面的整洁。手风琴是一种特殊的折叠面板，只允许单个内容区域展开。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/collapse-basic.tsx"></code>
+
+## API
+
+### MobileCollapse
+
+| 属性             | 说明                                                                  | 类型                                                | 默认值 |
+| ---------------- | --------------------------------------------------------------------- | --------------------------------------------------- | ------ |
+| accordion        | 是否开启手风琴模式                                                    | boolean                                             | false  |
+| activeKey        | 当前展开面板的 key                                                    | 手风琴模式：`string \| null`<br>非手风琴模式：`string[]` | -      |
+| arrow            | 自定义箭头，如果是 ReactNode，那么 antd-mobile 会自动为你增加旋转动画效果 | `ReactNode \| ((active: boolean) => React.ReactNode)` | -      |
+| defaultActiveKey | 默认展开面板的 key                                                    | 手风琴模式：`string \| null`<br>非手风琴模式：`string[]` | -      |
+| onChange         | 切换面板时触发                                                        | 手风琴模式：`(activeKey: string \| null) => void`<br>非手风琴模式：`(activeKey: string[]) => void` | - |
+
+### MobileCollapse.Panel
+
+| 属性          | 说明                       | 类型                                                | 默认值 |
+| ------------- | -------------------------- | --------------------------------------------------- | ------ |
+| arrow         | 自定义箭头                 | `ReactNode \| ((active: boolean) => React.ReactNode)` | -      |
+| destroyOnClose | 不可见时是否销毁 DOM 结构 | boolean                                             | false  |
+| disabled      | 是否为禁用状态             | boolean                                             | false  |
+| forceRender   | 被隐藏时是否渲染 DOM 结构  | boolean                                             | false  |
+| key           | 唯一标识符                 | string                                              | -      |
+| onClick       | 标题栏的点击事件           | `(event: React.MouseEvent<Element, MouseEvent>) => void` | -      |
+| title         | 标题栏左侧内容             | ReactNode                                           | -      |
+
+---
+
+### 文本省略 Ellipsis
+
+# 文本省略 Ellipsis
+
+文本省略组件，用于在单行或多行文本超出容器时自动以省略号结尾展示。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/ellipsis-basic.tsx"></code>
+
+## API
+
+| 属性             | 说明                                          | 类型                              | 默认值 |
+| ---------------- | --------------------------------------------- | --------------------------------- | ------ |
+| content          | 文本内容                                      | string                            | -      |
+| defaultExpanded  | 默认是否展开                                  | boolean                           | false  |
+| direction        | 省略位置，`end` 表示在末尾，`middle` 表示在中间 | `'end' \| 'middle'`               | `'end'`|
+| ellipsisNode     | 省略号的渲染内容                              | ReactNode                         | `...`  |
+| expandTrigger    | 触发展开的时机，`click` 表示点击文本展开       | `'click'`                         | -      |
+| rows             | 展示的行数                                    | number                            | 1      |
+| onCollapse       | 点击展开/收起时触发                            | `(collapsed: boolean) => void`    | -      |
+| onContentClick   | 点击文本内容时触发                            | `(e: React.MouseEvent) => void`   | -      |
+| onExpand         | 点击展开/收起时触发                            | `(expanded: boolean) => void`     | -      |
+
+## CSS 变量
+
+| 属性                | 说明         | 默认值            |
+| ------------------- | ------------ | ----------------- |
+| --ellipsis-font-size| 文本字号     | `inherit`         |
+| --ellipsis-color    | 文本颜色     | `var(--adm-color-text)` |
+
+---
+
+### 浮动面板 FloatingPanel
+
+# 浮动面板 FloatingPanel
+
+浮动在屏幕底部的可拖拽内容面板，适合用于承载地图、详情、筛选等次要但常用的内容。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/floatingpanel-basic.tsx"></code>
+
+## API
+
+| 属性            | 说明                                                                  | 类型                                              | 默认值 |
+| --------------- | --------------------------------------------------------------------- | ------------------------------------------------- | ------ |
+| anchors         | 可拖拽至的位置（距离屏幕顶部的高度）                                    | number[]                                          | -      |
+| animated         | 是否启用动画，仅在调用 ref 中的方法（setHeight、setState）时生效       | boolean                                           | false  |
+| children        | 面板内容                                                              | ReactNode                                         | -      |
+| draggingHandler | 自定义拖拽手柄                                                        | ReactNode                                         | -      |
+| handleRendering | 自定义整个手柄区域的渲染函数                                           | `(ts: number, handle: ReactNode) => ReactNode`    | -      |
+| height          | 当前高度（受控）                                                      | number                                            | -      |
+| onHeightChange  | 高度变化时触发                                                         | `(height: number, immediately: boolean) => void` | -      |
+
+### Ref
+
+| 属性       | 说明                                  | 类型                          |
+| ---------- | ------------------------------------- | ----------------------------- |
+| setHeight  | 设置当前高度                          | `(height: number, immediately?: boolean) => void` |
+| maxHeight  | 当前 anchors 中最大的高度             | -                             |
+
+## CSS 变量
+
+| 属性                          | 说明                          | 默认值                        |
+| ----------------------------- | ----------------------------- | ----------------------------- |
+| --border-radius               | 圆角大小                      | `8px`                         |
+| --border-top                  | 顶部边框                      | `none`                        |
+| --head-height                 | 头部拖拽手柄区域高度          | `28px`                        |
+| --handle-width                | 手柄的宽度                    | `32px`                        |
+| --handle-height               | 手柄的高度                    | `3px`                         |
+| --handle-color                | 手柄的颜色                    | `var(--adm-color-light)`      |
+| --z-index                     | z-index                       | `1000`                        |
+| --background                  | 面板背景色                    | `var(--adm-color-background)` |
+| --mask-color                  | 遮罩颜色                      | `rgba(0,0,0,0.32)`            |
+
+---
+
+### 页脚 Footer
+
+# 页脚 Footer
+
+页脚组件，位于页面最底部，用于展示版权信息、备案号、公司信息等补充内容。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/footer-basic.tsx"></code>
+
+## API
+
+| 属性           | 说明                                  | 类型                                                         | 默认值 |
+| -------------- | ------------------------------------- | ------------------------------------------------------------ | ------ |
+| chips          | 页脚操作项                            | `{ text: ReactNode; type?: 'plain' \| 'link'; onClick?: () => void }[]` | -      |
+| content        | 页脚内容                              | ReactNode                                                    | -      |
+| contentDivider | 是否显示 content 上方的分割线         | boolean                                                      | false  |
+| label          | 页脚文字                              | ReactNode                                                    | -      |
+| onChipClick    | 页脚操作项点击事件                    | `(chip: { text: ReactNode; type?: 'plain' \| 'link' }, index: number) => void` | -      |
+
+## CSS 变量
+
+| 属性                    | 说明                      | 默认值                            |
+| ----------------------- | ------------------------- | --------------------------------- |
+| --footer-color          | 页脚文字颜色              | `var(--adm-color-light)`          |
+| --footer-font-size      | 页脚文字大小              | `12px`                            |
+| --footer-padding-top    | 页脚顶部内边距            | `12px`                            |
+| --footer-padding-bottom | 页脚底部内边距            | `12px`                            |
+| --footer-line-height    | 页脚行高                  | `1.4`                             |
+| --footer-label-margin   | label 与 content 的间距   | `8px`                             |
+| --footer-chip-margin    | chips 项之间的间距        | `8px`                             |
+| --footer-chip-color     | chips 项文字颜色          | `var(--adm-color-primary)`        |
+| --footer-divider-color  | 分割线颜色                | `var(--adm-color-border)`         |
+
+---
+
+### 图片查看器 ImageViewer
+
+# 图片查看器 ImageViewer
+
+图片查看器，用于在页面上以全屏方式展示图片，支持双指缩放、滑动切换、命令式调用 `show` 等能力。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/imageviewer-basic.tsx"></code>
+
+## API
+
+### MobileImageViewer.Mobile
+
+| 属性       | 说明                       | 类型                                | 默认值 |
+| ---------- | -------------------------- | ----------------------------------- | ------ |
+| image      | 图片 URL                   | string                              | -      |
+| maxZoom    | 最大缩放比例               | number                              | 3      |
+| onClose    | 关闭时触发                 | `() => void`                        | -      |
+| renderFooter | 自定义底部内容            | `(image: string) => ReactNode`      | -      |
+| visible    | 是否显示                   | boolean                             | false  |
+
+### MobileImageViewer.Multi
+
+| 属性          | 说明                       | 类型                                | 默认值 |
+| ------------- | -------------------------- | ----------------------------------- | ------ |
+| defaultIndex  | 初始位置                   | number                              | 0      |
+| images        | 图片数组                   | string[]                            | -      |
+| maxZoom       | 最大缩放比例               | number                              | 3      |
+| onClose       | 关闭时触发                 | `() => void`                        | -      |
+| onIndexChange | 切换时触发                 | `(index: number) => void`           | -      |
+| renderFooter  | 自定义底部内容             | `(image: string, index: number) => ReactNode` | - |
+| visible       | 是否显示                   | boolean                             | false  |
+
+### 方法
+
+| 方法               | 说明              | 参数                            |
+| ------------------ | ----------------- | ------------------------------- |
+| MobileImageViewer.show  | 打开图片查看器 | `(options: ImageViewerOptions) => { close: () => void }` |
+| MobileImageViewer.clear | 关闭命令式调用的图片查看器 | `() => void` |
+| MobileImageViewer.Multi.show | 打开多图图片查看器 | `(options: MultiImageViewerOptions) => { close: () => void }` |
+
+## CSS 变量
+
+| 属性                      | 说明                        | 默认值           |
+| ------------------------- | --------------------------- | ---------------- |
+| --background              | 背景颜色                    | `#000`           |
+| --max-zoom                | 最大缩放比例                | `3`              |
+| --fade-duration           | 进入和退出的过渡时长        | `300ms`          |
+| --index-text-color        | 分页文字颜色                | `#fff`           |
+| --index-text-size         | 分页文字大小                | `14px`           |
+| --index-text-margin-bottom| 分页文字距离底部距离        | `64px`           |
+
+---
+
+### 图片 Image
+
+# 图片 Image
+
+图片展示组件，在原生 img 元素的基础上进行封装，支持加载中占位、加载失败提示、懒加载等能力。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/image-basic.tsx"></code>
+
+## API
+
+| 属性         | 说明                                                                | 类型                                          | 默认值 |
+| ------------ | ------------------------------------------------------------------- | --------------------------------------------- | ------ |
+| alt          | 图片描述                                                            | string                                        | -      |
+| fallback     | 加载失败的占位内容                                                  | ReactNode                                     | -      |
+| fit          | 图片填充模式                                                        | `'contain' \| 'cover' \| 'fill' \| 'none' \| 'scale-down'` | -  |
+| height       | 图片高度                                                            | number \| string                              | -      |
+| lazy         | 是否懒加载                                                          | boolean                                       | false  |
+| onClick      | 点击事件                                                            | `(event: React.MouseEvent<HTMLImageElement, Event>) => void` | - |
+| onError      | 加载失败时触发                                                      | `(event: React.SyntheticEvent<HTMLImageElement, Event>) => void` | - |
+| onLoad       | 加载完成时触发                                                      | `(event: React.SyntheticEvent<HTMLImageElement, Event>) => void` | - |
+| placeholder  | 加载中的占位内容                                                    | ReactNode                                     | -      |
+| src          | 图片地址                                                            | string                                        | -      |
+| width        | 图片宽度                                                            | number \| string                              | -      |
+
+## CSS 变量
+
+| 属性              | 说明       | 默认值           |
+| ----------------- | ---------- | ---------------- |
+| --adm-image-width | 图片宽度   | `auto`           |
+| --adm-image-height| 图片高度   | `auto`           |
+
+继承原生 `<img>` 元素的全部属性。
+
+---
+
+### 无限滚动 InfiniteScroll
+
+# 无限滚动 InfiniteScroll
+
+无限滚动组件，用于在列表滚动到底部时触发加载更多数据的交互，常与 MobileList、MobileListView 等搭配使用。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/infinitescroll-basic.tsx"></code>
+
+## API
+
+| 属性            | 说明                                                                   | 类型                                  | 默认值 |
+| --------------- | ---------------------------------------------------------------------- | ------------------------------------- | ------ |
+| children        | 自定义内容                                                              | ReactNode                             | -      |
+| content         | 自定义加载文案，可选                                                    | ReactNode                             | -      |
+| hasMore         | 是否还有更多内容                                                        | boolean                               | false  |
+| loadMore        | 加载更多的回调函数                                                      | `(isRetry: boolean) => Promise<void>` | -      |
+| threshold       | 触底距离阈值，单位 `px`                                                 | number                                | 50     |
+
+### Ref
+
+| 方法    | 说明                   | 类型         |
+| ------- | ---------------------- | ------------ |
+| retry   | 重新加载失败时的数据   | `() => void` |
+
+## CSS 变量
+
+| 属性               | 说明           | 默认值                            |
+| ------------------ | -------------- | --------------------------------- |
+| --color            | 文本颜色       | `var(--adm-color-weak)`           |
+| --font-size        | 字体大小       | `13px`                            |
+| --padding          | 内边距         | `12px`                            |
+| --failed-color     | 失败文案颜色   | `var(--adm-color-danger)`         |
+| --failed-color-2   | 重试按钮颜色   | `var(--adm-color-primary)`        |
+
+---
+
+### 列表 List
+
+# 列表 List
+
+通用列表，以列表的形式干净高效的承载文字、列表、图片、段落等内容。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/list-basic.tsx"></code>
+
+## API
+
+### MobileList
+
+| 属性   | 说明     | 类型                                        | 默认值     |
+| ------ | -------- | ------------------------------------------- | ---------- |
+| header | 标题内容 | ReactNode                                   | -          |
+| mode   | 支持默认和卡片两种模式 | `'default' \| 'card'` | `'default'` |
+
+#### Ref
+
+| 属性          | 说明             | 类型                    |
+| ------------- | ---------------- | ----------------------- |
+| nativeElement | 原始 div 元素    | `HTMLDivElement \| null` |
+
+### MobileList.Item
+
+| 属性        | 说明                                             | 类型                          | 默认值 |
+| ----------- | ------------------------------------------------ | ----------------------------- | ------ |
+| arrow       | 右侧是否显示箭头图标，也支持传入 ReactNode 自定义图标 | `boolean \| ReactNode` | 和 clickable 的值保持一致 |
+| children    | 列表项中间的主内容区域                           | ReactNode                     | -      |
+| clickable   | 是否显示点击效果                                 | boolean                       | 当 onClick 属性存在时，默认为 true，否则默认为 false |
+| description | 列表项中间下部的描述区域                         | ReactNode                     | -      |
+| disabled    | 是否禁用                                         | boolean                       | false  |
+| extra       | 列表项右侧区域                                   | ReactNode                     | -      |
+| onClick     | 列表项的点击事件，当设置了 onClick 属性时，列表项会有点击效果 | `(e: React.MouseEvent) => void` | -      |
+| prefix      | 列表项左侧区域                                   | ReactNode                     | -      |
+| title       | 列表项中间上部的标题区域                         | ReactNode                     | -      |
+
+## CSS 变量
+
+### MobileList
+
+| 属性                    | 说明                          | 默认值                              |
+| ----------------------- | ----------------------------- | ----------------------------------- |
+| --active-background-color | 点击时的背景颜色              | `var(--adm-border-color)`           |
+| --align-items           | 列表项的 align-item           | `center`                            |
+| --border-bottom         | 列表容器底部的边框样式        | `solid 1px var(--adm-border-color)` |
+| --border-inner          | 列表项底部的边框样式          | `solid 1px var(--adm-border-color)` |
+| --border-top            | 列表容器顶部的边框样式        | `solid 1px var(--adm-border-color)` |
+| --extra-max-width       | extra 部分的最大宽度          | `70%`                               |
+| --font-size             | Body 内容的字体大小           | `17px`                              |
+| --header-font-size      | 头部的字体大小                | `15px`                              |
+| --padding-left          | 列表项和列表头部左侧的 padding | `12px`                              |
+| --padding-right         | 列表项和列表头部右侧的 padding | `12px`                              |
+| --prefix-padding-right  | prefix 部分的右侧 padding     | `12px`                              |
+| --prefix-width          | prefix 部分的宽度             | `auto`                              |
+
+### MobileList.Item
+
+支持 MobileList 中的 `--prefix-width`、`--active-background-color`、`--align-items`。
+
+## FAQ
+
+### 列表能否支持虚拟滚动？
+
+MobileList 本身不会支持虚拟滚动，可以结合 [react-virtualized](https://github.com/bvaughn/react-virtualized) 实现。
+
+### 列表能否支持拖拽排序？
+
+MobileList 本身不会支持拖拽排序，可以结合 [react-beautiful-dnd](https://github.com/atlassian/react-beautiful-dnd) 实现。
+
+---
+
+### 分页符 PageIndicator
+
+# 分页符 PageIndicator
+
+页码指示器，常和 Swiper 走马灯、ImageViewer 等组件搭配使用，用于指示当前所在页。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/pageindicator-basic.tsx"></code>
+
+## API
+
+| 属性       | 说明                                    | 类型                          | 默认值 |
+| ---------- | --------------------------------------- | ----------------------------- | ------ |
+| color      | 默认的圆点颜色                          | string                        | -      |
+| current    | 当前页索引（从 0 开始）                 | number                        | 0      |
+| direction  | 方向                                    | `'horizontal' \| 'vertical'`  | `'horizontal'` |
+| total      | 总页数                                  | number                        | 0      |
+| style      | 样式                                    | `React.CSSProperties`         | -      |
+| className  | 类名                                    | string                        | -      |
+
+## CSS 变量
+
+| 属性                              | 说明                       | 默认值                  |
+| --------------------------------- | -------------------------- | ----------------------- |
+| --dot-color                       | 默认的圆点颜色             | `var(--adm-color-weak)` |
+| --active-dot-color                | 当前激活的圆点颜色         | `var(--adm-color-primary)` |
+| --dot-size                       | 圆点尺寸                   | `3px`                   |
+| --active-dot-size                | 当前激活的圆点尺寸         | `13px`                  |
+| --dot-border-radius              | 圆点的圆角                 | `1px`                   |
+| --active-dot-border-radius       | 当前激活圆点的圆角         | `2px`                   |
+| --dot-spacing                     | 圆点之间的间距             | `3px`                   |
+| --dot-transition-duration         | 圆点动画时长               | `300ms`                 |
+
+---
+
+### 分段控制器 Segmented
+
+# 分段控制器 Segmented
+
+至少两个选项的切换组件，常用于在相同视图下进行并列内容区块的切换展示。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/segmented-basic.tsx"></code>
+
+## API
+
+| 属性     | 说明                                              | 类型                                           | 默认值 |
+| -------- | ------------------------------------------------- | ---------------------------------------------- | ------ |
+| block    | 是否撑满父元素                                    | boolean                                        | false  |
+| disabled | 是否禁用                                          | boolean                                        | false  |
+| onChange | 选项变化时的回调函数                              | `(value: SegmentedValue) => void`              | -      |
+| options  | 选项数据                                          | `SegmentedRawOption[] \| SegmentedLabeledOption[]` | -      |
+| value    | 当前选中的值（受控）                              | `SegmentedValue`                               | -      |
+| defaultValue | 当前选中的默认值（非受控）                    | `SegmentedValue`                               | -      |
+
+### SegmentedRawOption
+
+`string \| number`
+
+### SegmentedLabeledOption
+
+| 属性     | 说明             | 类型              | 默认值 |
+| -------- | ---------------- | ----------------- | ------ |
+| disabled | 是否禁用该选项   | boolean           | false  |
+| label    | 选项的显示内容   | ReactNode         | -      |
+| value    | 选项的值         | `SegmentedValue`  | -      |
+
+## CSS 变量
+
+| 属性                  | 说明                        | 默认值                               |
+| --------------------- | --------------------------- | ------------------------------------ |
+| --height              | 高度                        | `28px`                               |
+| --border-radius       | 圆角大小                    | `6px`                                |
+| --item-color          | 未选中文本颜色              | `var(--adm-color-text-secondary)`    |
+| --item-active-color   | 选中文本颜色                | `var(--adm-color-primary)`           |
+| --item-active-bg      | 选中项背景色                | `var(--adm-color-background)`        |
+| --track-bg            | 容器轨道背景色              | `var(--adm-color-box)`               |
+
+---
+
+### 步骤条 Steps
+
+# 步骤条 Steps
+
+步骤条组件，引导用户按照流程完成任务的导航条，支持横向和纵向、错误状态、自定义图标等能力。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/steps-basic.tsx"></code>
+
+## API
+
+### MobileSteps
+
+| 属性      | 说明                                                     | 类型                              | 默认值       |
+| --------- | -------------------------------------------------------- | --------------------------------- | ------------ |
+| current   | 指定当前步骤，从 0 开始记数。在子 MobileSteps.Step 元素中，可以通过 `status` 属性覆盖状态 | number                            | 0            |
+| direction | 显示方向                                                 | `'horizontal' \| 'vertical'`      | `'horizontal'` |
+| status    | 指定当前步骤的状态                                       | `'wait' \| 'process' \| 'finish' \| 'error'` | `'process'`  |
+
+### MobileSteps.Step
+
+| 属性        | 说明                                         | 类型                | 默认值 |
+| ----------- | -------------------------------------------- | ------------------- | ------ |
+| description | 步骤的详情描述                               | ReactNode           | -      |
+| icon        | 步骤图标的类型                               | ReactNode           | -      |
+| status      | 步骤的状态，如果不设置，则会根据 current 自动生成 | `'wait' \| 'process' \| 'finish' \| 'error'` | -      |
+| title       | 步骤的标题                                   | ReactNode           | -      |
+
+---
+
+### 走马灯 Swiper
+
+# 走马灯 Swiper
+
+用于在有限空间内展示一组图片或相同结构的轮播内容，支持自动播放、循环、纵向等能力。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/swiper-basic.tsx"></code>
+
+## API
+
+### MobileSwiper
+
+| 属性            | 说明                                                         | 类型                                            | 默认值 |
+| --------------- | ------------------------------------------------------------ | ----------------------------------------------- | ------ |
+| allowDragMode   | 拖动切换模式，`true` 表示可以拖到相邻                                          | boolean                                         | -      |
+| autoplay        | 是否自动切换                                                 | boolean                                         | false  |
+| autoplayInterval | 自动切换的时间间隔，单位为 ms                              | number                                          | 3000   |
+| defaultIndex    | 初始位置                                                     | number                                          | 0      |
+| direction       | 方向                                                         | `'horizontal' \| 'vertical'`                    | `'horizontal'` |
+| indicator       | 自定义指示器的全貌，为 `(total, current) => ReactNode`       | `(total: number, current: number) => ReactNode` | -      |
+| index           | 当前位置（受控）                                             | number                                          | -      |
+| loop            | 是否循环                                                     | boolean                                         | true   |
+| onIndexChange   | 切换时触发                                                   | `(index: number) => void`                       | -      |
+| rebound         | 拖动到边界时是否产生回弹效果                                 | boolean                                         | false  |
+| rubberband      | 在非循环模式下，拖动超过边界时是否出现橡皮筋效果             | boolean                                         | false  |
+| slideSize       | 每个 slide 的尺寸百分比                                       | number                                          | 100    |
+| stuckAtBoundary | 在 loop=false 模式下，是否开启边界吸顶                       | boolean                                         | false  |
+| trackOffset     | 第一个 slide 距离左侧的偏移量百分比                           | number                                          | 0      |
+| children        | 内容                                                          | ReactNode                                       | -      |
+
+#### Ref
+
+| 属性    | 说明                                              | 类型                          |
+| ------- | ------------------------------------------------- | ----------------------------- |
+| swipeTo | 切换到指定位置                                    | `(index: number, immediate?: boolean) => void` |
+| swipeNext | 切换到下一个                                    | `() => void`                  |
+| swipePrev | 切换到上一个                                    | `() => void`                  |
+
+### MobileSwiper.Item
+
+MobileSwiper 的每一项，`children` 为该项内容。
+
+## CSS 变量
+
+| 属性                      | 说明                        | 默认值              |
+| ------------------------- | --------------------------- | ------------------- |
+| --height                  | Swiper 高度                 | `auto` 或 100%      |
+| --width                   | Swiper 宽度                 | `100%`              |
+| --slide-size              | 每个 slide 的尺寸           | `100%`              |
+| --track-padding           | 滚动容器的内边距            | `0`                 |
+| --track-offset            | 滚动容器起始位置的偏移      | `0`                 |
+| --border-radius           | 圆角大小                    | `0`                 |
+| --indicator-margin-right  | 指示器距离右侧的距离        | `12px`              |
+| --indicator-margin-bottom | 指示器距离底部的距离        | `12px`              |
+
+---
+
+### 标签 Tag
+
+# 标签 Tag
+
+进行标记和分类的小标签。适用于标记事物的属性和维度、进行分类等场景。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/tag-basic.tsx"></code>
+
+## API
+
+| 属性    | 说明         | 类型                                                                | 默认值     |
+| ------- | ------------ | ------------------------------------------------------------------- | ---------- |
+| color   | 标签色       | `'default' \| 'primary' \| 'success' \| 'warning' \| 'danger' \| string` | `'default'` |
+| fill    | 填充模式     | `'solid' \| 'outline'`                                              | `'solid'`  |
+| onClick | 标签点击事件 | `(event: React.MouseEvent<HTMLSpanElement, MouseEvent>) => void`    | -          |
+| round   | 是否圆角     | boolean                                                             | false      |
+
+## CSS 变量
+
+| 属性               | 说明                                                                                                                                               | 默认值                                                                          | 全局变量                 |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ------------------------ |
+| --background-color | 背景颜色                                                                                                                                           | 当 `fill=solid` 时，默认值为 `color` 属性对应的颜色；当 `fill=outline` 时，默认值为 `#ffffff` | -                        |
+| --border-color     | 边框颜色                                                                                                                                           | `color` 属性对应的颜色                                                          | -                        |
+| --border-radius    | `round=false` 时的圆角大小                                                                                                                         | `2px`                                                                           | `--adm-tag-border-radius`|
+| --text-color       | 文字颜色                                                                                                                                           | 当 `fill=solid` 时，默认值为 `#ffffff`；当 `fill=outline` 时，默认值为 `color` 属性对应的颜色 | -                        |
+
+---
+
+### 水印 WaterMark
+
+# 水印 WaterMark
+
+水印组件，用于在页面上添加文字或图片水印，常用于保护版权、防截图、防信息泄露等场景。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/watermark-basic.tsx"></code>
+
+## API
+
+| 属性        | 说明                              | 类型                          | 默认值 |
+| ----------- | --------------------------------- | ----------------------------- | ------ |
+| children    | 容器子元素                        | ReactNode                     | -      |
+| content     | 水印文字内容                      | `string \| string[]`          | -      |
+| fontColor   | 水印文字颜色                      | string                        | `rgba(0, 0, 0, 0.15)` |
+| fontSize    | 水印文字大小                      | `string \| number`            | `14px` |
+| gapX        | 水印之间的水平间距                | number                        | `24`   |
+| gapY        | 水印之间的垂直间距                | number                        | `48`   |
+| height      | 水印的高度                        | number                        | `64`   |
+| image       | 图片水印的 URL                    | string                        | -      |
+| rotate      | 水印的旋转角度                    | number                        | `-22`  |
+| width       | 水印的宽度                        | number                        | `120`  |
+| zIndex      | 水印层的 z-index                  | number                        | `2000` |
+| fullPage    | 是否覆盖整个页面                  | boolean                       | true   |
+| onClick     | 点击事件                          | `(e: React.MouseEvent) => void` | -    |
+
+## CSS 变量
+
+| 属性              | 说明         | 默认值               |
+| ----------------- | ------------ | -------------------- |
+| --z-index         | z-index      | `2000`               |
+
+---
+
+## 反馈（16 个）
+
+### 动作面板 ActionSheet
+
+# 动作面板 ActionSheet
+
+从底部弹出的动作选择面板，提供一组与当前情境相关的操作选项。基于 antd-mobile ActionSheet 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+- 需要从底部弹出一组相关操作选项时使用，例如列表项的更多操作、分享面板等。
+- 适用于操作数量适中（2~6 个），每个操作都有简短文案说明的场景。
+- 对于重要的操作（如删除），可以通过 `danger` 属性标记为危险操作。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/actionsheet-basic.tsx"></code>
+
+## API
+
+继承 antd-mobile [ActionSheetProps](https://mobile.ant.design/zh/components/action-sheet#api)，完整支持以下属性。
+
+### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| actions | 菜单项列表 | `Action[]` | `[]` |
+| afterClose | ActionSheet 完全关闭后的回调 | `() => void` | - |
+| afterShow | ActionSheet 完全展示后的回调 | `() => void` | - |
+| cancelText | 取消按钮的文字，为空时不展示取消按钮 | `string` | `'取消'` |
+| closeOnAction | 点击某个选项后是否自动关闭 | `boolean` | `false` |
+| closeOnMaskClick | 点击背景蒙层是否关闭 | `boolean` | `true` |
+| destroyOnClose | 不可见时是否销毁 `DOM` 结构 | `boolean` | `false` |
+| extra | 顶部的辅助内容 | `ReactNode` | - |
+| getContainer | 自定义弹窗的父节点 | `HTMLElement \| (() => HTMLElement) \| null` | `document.body` |
+| mask | 是否展示蒙层 | `boolean` | `true` |
+| maskClassName | 遮罩类名 | `string` | - |
+| onCancel | 取消按钮点击时的回调 | `() => void` | - |
+| onClose | 关闭事件 | `() => void` | - |
+| onAction | 点击选项时触发 | `(action: Action, index: number) => void` | - |
+| popupClassName | 内容区域类名 | `string` | - |
+| popupStyle | 内容区域样式 | `React.CSSProperties` | - |
+| visible | 是否显示 | `boolean` | `false` |
+
+### Action
+
+`actions` 属性的每一项。
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| bold | 是否加粗 | `boolean` | `false` |
+| danger | 是否为危险操作 | `boolean` | `false` |
+| disabled | 是否禁用 | `boolean` | `false` |
+| key | 唯一标记 | `string \| number` | - |
+| onClick | 点击事件 | `() => void` | - |
+| text | 文本 | `ReactNode` | - |
+
+### CSS 变量
+
+| 属性 | 说明 | 默认值 | 全局变量 |
+| --- | --- | --- | --- |
+| `--background-color` | `ActionSheet` 背景颜色 | `var(--adm-color-background)` | `--adm-action-sheet-background-color` |
+| `--border-color` | 边框颜色 | `var(--adm-color-border)` | `--adm-action-sheet-border-color` |
+| `--cancel-padding-top` | `Cancel` 按钮上方的 `padding` | `var(--adm-margin-xs)` | `--adm-action-sheet-cancel-padding-top` |
+| `--danger-color` | `danger` 操作的颜色 | `var(--adm-color-danger)` | `--adm-action-sheet-danger-color` |
+| `--extra-color` | `extra` 文字的颜色 | `var(--adm-color-weak)` | `--adm-action-sheet-extra-color` |
+| `--item-height` | 单个菜单项的高度 | `50px` | `--adm-action-sheet-item-height` |
+| `--z-index` | 元素的 `z-index` | `1000` | `--adm-action-sheet-z-index` |
+
+### 命令式 API
+
+`MobileActionSheet` 同时提供了命令式的 API，可以直接调用 `show` 方法。
+
+#### `MobileActionSheet.show(props)`
+
+显示 `MobileActionSheet`，`props` 同 [属性](#属性) 一致。返回的 `handler` 对象支持 `close` 方法。
+
+---
+
+### 中心弹出层 CenterPopup
+
+# 中心弹出层 CenterPopup
+
+在屏幕中央弹出的浮层，常用于对话框、引导页等内容承载。基于 antd-mobile CenterPopup 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+- 需要一个从屏幕中央弹出（带缩放动画）的浮层容器。
+- 是 `MobileDialog`、`MobileModal` 的底层弹出层组件。
+- 适用于需要自定义标题、底部操作、内容的居中弹出场景。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/centerpopup-basic.tsx"></code>
+
+## API
+
+继承 antd-mobile [CenterPopupProps](https://mobile.ant.design/zh/components/center-popup#api)，完整支持以下属性。
+
+### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| afterClose | 完全关闭后的回调 | `() => void` | - |
+| afterShow | 完全展示后的回调 | `() => void` | - |
+| bodyClassName | 内容区域的 `class` | `string` | - |
+| bodyStyle | 内容区域的样式 | `React.CSSProperties` | - |
+| children | 弹窗内容 | `ReactNode` | - |
+| closeOnAction | 点击操作按钮后是否自动关闭 | `boolean` | `false` |
+| closeOnMaskClick | 点击蒙层是否关闭 | `boolean` | `true` |
+| destroyOnClose | 不可见时是否销毁 `DOM` 结构 | `boolean` | `false` |
+| disableBodyScroll | 是否禁用 `body` 滚动 | `boolean` | `true` |
+| forceRender | 强制渲染 `DOM` | `boolean` | `false` |
+| getContainer | 自定义弹窗的父节点 | `HTMLElement \| (() => HTMLElement) \| null` | `document.body` |
+| mask | 是否展示蒙层 | `boolean` | `true` |
+| maskClassName | 蒙层的 `class` | `string` | - |
+| maskStyle | 蒙层的样式 | `React.CSSProperties` | - |
+| onAction | 点击操作按钮时触发 | `(action: DialogAction) => void` | - |
+| onMaskClick | 点击蒙层触发 | `() => void` | - |
+| opacity | 蒙层的透明度 | `number` | - |
+| showCloseButton | 是否展示关闭按钮 | `boolean` | `false` |
+| stopPropagation | 阻止某些事件的冒泡 | `PropagationEvent[]` | `['click', 'touchmove']` |
+| title | 标题 | `ReactNode` | - |
+| visible | 是否显示 | `boolean` | `false` |
+
+### CSS 变量
+
+| 属性 | 说明 | 默认值 | 全局变量 |
+| --- | --- | --- | --- |
+| `--background-color` | 内容区域背景色 | `var(--adm-color-background)` | `--adm-center-popup-background-color` |
+| `--border-radius` | 圆角大小 | `8px` | `--adm-center-popup-border-radius` |
+| `--close-button-color` | 关闭按钮颜色 | `var(--adm-color-weak)` | `--adm-center-popup-close-button-color` |
+| `--max-width` | 最大宽度 | `75vw` | `--adm-center-popup-max-width` |
+| `--min-width` | 最小宽度 | `280px` | `--adm-center-popup-min-width` |
+| `--title-color` | 标题颜色 | `var(--adm-color-text)` | `--adm-center-popup-title-color` |
+| `--title-font-size` | 标题字号 | `18px` | `--adm-center-popup-title-font-size` |
+| `--z-index` | 元素的 `z-index` | `1000` | `--adm-center-popup-z-index` |
+
+---
+
+### 对话框 Dialog
+
+# 对话框 Dialog
+
+模态对话框，在浮层中显示，常用于重要信息确认或表单内容填写场景。基于 antd-mobile Dialog 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+- 需要用户处理事务，又不希望跳转页面时，可以使用 `MobileDialog` 在当前页面正中打开一个浮层，承载相应的操作。
+- 需要用户立即响应的重要提示信息（警告、确认）可使用命令式 API `MobileDialog.alert` / `MobileDialog.confirm`。
+- 与 `MobileModal` 相比，`MobileDialog` 默认带有标题、关闭按钮、底部操作按钮的标准结构。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/dialog-basic.tsx"></code>
+
+## API
+
+继承 antd-mobile [DialogProps](https://mobile.ant.design/zh/components/dialog#api)，完整支持以下属性。
+
+### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| actions | 操作按钮列表 | `DialogAction[]` | `[]` |
+| afterClose | `MobileDialog` 完全关闭后的回调 | `() => void` | - |
+| afterShow | `MobileDialog` 完全展示后的回调 | `() => void` | - |
+| bodyClassName | 内容区域的类名 | `string` | - |
+| bodyStyle | 内容区域的样式 | `React.CSSProperties` | - |
+| closeOnAction | 点击操作按钮后后是否自动关闭 | `boolean` | `false` |
+| closeOnMaskClick | 点击蒙层是否关闭 | `boolean` | `true` |
+| content | 内容 | `ReactNode` | - |
+| destroyOnClose | 不可见时是否销毁 `DOM` 结构 | `boolean` | `false` |
+| disableBodyScroll | 是否禁用 `body` 滚动 | `boolean` | `true` |
+| forceRender | 强制渲染 `DOM` | `boolean` | `false` |
+| getContainer | 自定义弹窗的父节点 | `HTMLElement \| (() => HTMLElement) \| null` | `document.body` |
+| header | 顶部的自定义区域 | `ReactNode` | - |
+| image | 图片 `url` | `string` | - |
+| mask | 是否展示蒙层 | `boolean` | `true` |
+| onClose | 关闭事件 | `() => void` | - |
+| onConfirm | 确认事件 | `() => void` | - |
+| showCloseButton | 是否展示关闭按钮 | `boolean` | `false` |
+| stopPropagation | 阻止某些事件的冒泡 | `PropagationEvent[]` | `['click', 'touchmove']` |
+| title | 标题 | `ReactNode` | - |
+| visible | 是否显示 | `boolean` | `false` |
+
+### DialogAction
+
+`actions` 属性的每一项。
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| bold | 是否加粗 | `boolean` | `false` |
+| className | 添加到对应按钮的 `class` | `string` | - |
+| danger | 是否为危险操作 | `boolean` | `false` |
+| disabled | 是否禁用 | `boolean` | `false` |
+| key | 唯一标记 | `string \| number` | - |
+| onClick | 点击事件 | `() => void \| Promise<void>` | - |
+| style | 添加到对应按钮的 `style` | `React.CSSProperties` | - |
+| text | 文本 | `ReactNode` | - |
+
+### CSS 变量
+
+| 属性 | 说明 | 默认值 | 全局变量 |
+| --- | --- | --- | --- |
+| `--background-color` | 对话框背景色 | `var(--adm-color-background)` | `--adm-dialog-background-color` |
+| `--border-radius` | 圆角大小 | `8px` | `--adm-dialog-border-radius` |
+| `--close-button-color` | 关闭按钮颜色 | `#999` | `--adm-dialog-close-button-color` |
+| `--content-color` | 内容文本颜色 | `var(--adm-color-weak)` | `--adm-dialog-content-color` |
+| `--content-font-size` | 内容文本字号 | `15px` | `--adm-dialog-content-font-size` |
+| `--header-color` | 头部文本颜色 | `var(--adm-color-text)` | `--adm-dialog-header-color` |
+| `--header-font-size` | 头部文本字号 | `18px` | `--adm-dialog-header-font-size` |
+| `--image-height` | 图片高度 | `128px` | `--adm-dialog-image-height` |
+| `--image-width` | 图片宽度 | `128px` | `--adm-dialog-image-width` |
+| `--z-index` | 对话框层级 | `1000` | `--adm-dialog-z-index` |
+
+### 命令式 API
+
+`MobileDialog` 同时提供了命令式的 API，可以直接调用 `show`、`alert`、`confirm` 方法。
+
+#### `MobileDialog.show(props)`
+
+显示对话框，`props` 同 [属性](#属性) 一致。返回一个 `handler` 对象，可以通过 `handler.close()` 关闭。
+
+#### `MobileDialog.alert(props)`
+
+显示警告对话框，相比于 `MobileDialog.show`，它会默认带有一个"我知道了"按钮。返回的 `handler` 对象额外支持 `close` 方法。
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| confirmText | 确认按钮的文字 | `string` | `'我知道了'` |
+| onConfirm | 点击确认按钮时触发 | `() => void` | - |
+
+此外，还支持上面 `MobileDialog.show` 中大部分的属性（除 `actions` 外）。
+
+#### `MobileDialog.confirm(props)`
+
+显示确认对话框，相比于 `MobileDialog.show`，它会默认带有"取消"和"确认"两个按钮。返回的 `handler` 对象额外支持 `close` 方法。
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| cancelText | 取消按钮的文字 | `string` | `'取消'` |
+| confirmText | 确认按钮的文字 | `string` | `'确认'` |
+| onCancel | 点击取消按钮时触发 | `() => void` | - |
+| onConfirm | 点击确认按钮时触发 | `() => void` | - |
+
+此外，还支持上面 `MobileDialog.show` 中大部分的属性（除 `actions` 外）。
+
+### FAQ
+
+#### 为什么命令式调用 `MobileDialog.show` 时，`MobileConfigProvider` 的内容没有生效？
+
+命令式调用是通过 `ReactDOM.render`（或 `createRoot`）创建一个独立的 React 树来实现的，它脱离了当前应用所在的组件树，所以 `MobileConfigProvider` 的内容不会生效。如果需要在命令式调用中使用全局配置，可以自行封装一层命令式方法，将全局配置作为默认值传入。
+
+---
+
+### 空状态 Empty
+
+# 空状态 Empty
+
+空状态时展示的占位提示。基于 antd-mobile Empty 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+- 当目前没有数据、没有内容、没有任务可展示时，用于友好地提示用户。
+- 适用于列表、搜索、个人中心等页面无数据或无任务的场景。
+- 如果需要更完整的"异常"或"空状态"展示（带标题、描述、操作按钮），可以考虑使用 `MobileErrorBlock`。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/empty-basic.tsx"></code>
+
+## API
+
+继承 antd-mobile [EmptyProps](https://mobile.ant.design/zh/components/empty#api)，完整支持以下属性。
+
+### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| className | 外层 `class` | `string` | - |
+| description | 描述文字 | `ReactNode` | - |
+| image | 自定义图片，可以是 `string` 类型的图片 `url` 或 `ReactNode` 类型的节点 | `string \| ReactNode` | - |
+| imageStyle | 自定义图片样式 | `React.CSSProperties` | - |
+| style | 外层 `style` | `React.CSSProperties` | - |
+
+### CSS 变量
+
+| 属性 | 说明 | 默认值 | 全局变量 |
+| --- | --- | --- | --- |
+| `--description-color` | 描述文字颜色 | `var(--adm-color-light)` | `--adm-empty-description-color` |
+| `--image-height` | 图片高度 | `96px` | `--adm-empty-image-height` |
+| `--image-width` | 图片宽度 | `96px` | `--adm-empty-image-width` |
+
+---
+
+### 异常 ErrorBlock
+
+# 异常 ErrorBlock
+
+发生异常或无数据时用于占位提示。基于 antd-mobile ErrorBlock 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+- 页面或区块处于异常状态（如加载失败、网络异常、无权限、空状态）时，用于友好的占位展示。
+- 相比于 `MobileEmpty`，`MobileErrorBlock` 内置了 `default`、`disconnected`、`empty`、`busy` 四种状态场景。
+- 可以搭配操作按钮（重新加载、返回等）一起使用。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/errorblock-basic.tsx"></code>
+
+## API
+
+继承 antd-mobile [ErrorBlockProps](https://mobile.ant.design/zh/components/error-block#api)，完整支持以下属性。
+
+### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| children | 操作区，例如"重新加载"按钮 | `ReactNode` | - |
+| description | 描述 | `ReactNode` | `'Error occurred` or `'No data'` or null |
+| full | 是否撑满父级容器的高度和宽度，`full` 模式下会自带灰色背景 | `boolean` | `false` |
+| fullWidth | 是否将默认的 `padding` 设为 `0`，靠左对齐渲染 | `boolean` | `false` |
+| image | 自定义图片，可以是图片 `url` 字符串或 `ReactNode` 类型 | `string \| ReactNode` | 内置图片 |
+| status | 状态类型，内置了 `default`、`disconnected`、`empty`、`busy` 四种场景 | `'default' \| 'disconnected' \| 'empty' \| 'busy' \| string` | `'default'` |
+| style | 自定义外层容器的样式 | `React.CSSProperties` | - |
+| title | 标题 | `ReactNode` | `'Page Error'` or `'Empty'` |
+
+### CSS 变量
+
+| 属性 | 说明 | 默认值 | 全局变量 |
+| --- | --- | --- | --- |
+| `--background-color` | `full` 模式下的背景色 | `var(--adm-color-box)` | `--adm-error-block-background-color` |
+| `--description-color` | 描述文字颜色 | `var(--adm-color-weak)` | `--adm-error-block-description-color` |
+| `--description-font-size` | 描述文字字号 | `var(--adm-font-size-7)` | `--adm-error-block-description-font-size` |
+| `--image-height` | 图片高度 | `96px` | `--adm-error-block-image-height` |
+| `--image-width` | 图片宽度 | `96px` | `--adm-error-block-image-width` |
+| `--title-color` | 标题文字颜色 | `var(--adm-color-text)` | `--adm-error-block-title-color` |
+| `--title-font-size` | 标题文字字号 | `var(--adm-font-size-9)` | `--adm-error-block-title-font-size` |
+
+### 创建自定义 ErrorBlock
+
+#### `createMobileErrorBlock(props)`
+
+创建一个带有自定义状态场景的 `MobileErrorBlock` 组件，基于 `MobileErrorBlock` 上层封装。
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| errorStates | 状态描述的映射表 | `Record<string, ErrorStateConfig>` | 见下方 |
+
+`errorStates` 的每一项：
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| description | 该状态默认的描述 | `ReactNode` | - |
+| image | 该状态默认的图片 | `string \| ReactNode` | - |
+| title | 该状态默认的标题 | `ReactNode` | - |
+
+---
+
+### 背景蒙层 Mask
+
+# 背景蒙层 Mask
+
+遮罩层，常配合其他弹层组件使用。基于 antd-mobile Mask 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+- 需要覆盖屏幕底层内容的半透明背景蒙层时使用。
+- 常作为 `MobileDialog`、`MobilePopup`、`MobileToast` 等弹层组件的底层蒙层能力。
+- 适用于自定义弹层场景中需要单独控制蒙层显隐、动画、点击事件的情况。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/mask-basic.tsx"></code>
+
+## API
+
+继承 antd-mobile [MaskProps](https://mobile.ant.design/zh/components/mask#api)，完整支持以下属性。
+
+### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| afterClose | 完全关闭后的回调 | `() => void` | - |
+| afterShow | 完全展示后的回调 | `() => void` | - |
+| children | 内容 | `ReactNode` | - |
+| color | 蒙层的颜色，可选值 `'black'` 或 `'white'` | `'black' \| 'white'` | `'black'` |
+| destroyOnClose | 不可见时是否销毁 `DOM` 结构 | `boolean` | `false` |
+| disableBodyScroll | 是否禁用 `body` 滚动 | `boolean` | `true` |
+| forceRender | 强制渲染 `DOM` | `boolean` | `false` |
+| getContainer | 自定义蒙层的父节点 | `HTMLElement \| (() => HTMLElement) \| null` | `document.body` |
+| onMaskClick | 点击蒙层触发 | `() => void` | - |
+| opacity | 蒙层的透明度，可选值 `'default'`、`'dark'`、`'light'` 或具体数字 | `'default' \| 'dark' \| 'light' \| number` | `'default'` |
+| stopPropagation | 阻止某些事件的冒泡 | `PropagationEvent[]` | `['click']` |
+| visible | 是否显示 | `boolean` | `false` |
+
+### CSS 变量
+
+| 属性 | 说明 | 默认值 | 全局变量 |
+| --- | --- | --- | --- |
+| `--z-index` | 元素的 `z-index` | `1000` | `--adm-mask-z-index` |
+
+---
+
+### 弹窗 Modal
+
+# 弹窗 Modal
+
+模态弹窗，在浮层中显示，承载相关操作。基于 antd-mobile Modal 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+- 需要用户处理事务，又不希望跳转页面时，可以使用 `MobileModal` 在当前页面正中打开一个浮层，承载相应的操作。
+- 需要用户立即响应的重要提示信息（警告、确认）可使用命令式 API `MobileModal.alert` / `MobileModal.confirm`。
+- 与 `MobileDialog` 相比，`MobileModal` 默认不带有标题、关闭按钮、底部操作按钮的结构，更适合自定义内容场景。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/modal-basic.tsx"></code>
+
+## API
+
+继承 antd-mobile [ModalProps](https://mobile.ant.design/zh/components/modal#api)，完整支持以下属性。`MobileModal` 继承自 `MobileDialog`，所有属性与 `MobileDialog` 保持一致。
+
+### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| actions | 操作按钮列表 | `DialogAction[]` | `[]` |
+| afterClose | `MobileModal` 完全关闭后的回调 | `() => void` | - |
+| afterShow | `MobileModal` 完全展示后的回调 | `() => void` | - |
+| bodyClassName | 内容区域的类名 | `string` | - |
+| bodyStyle | 内容区域的样式 | `React.CSSProperties` | - |
+| children | 自定义内容 | `ReactNode` | - |
+| closeOnAction | 点击操作按钮后是否自动关闭 | `boolean` | `false` |
+| closeOnMaskClick | 点击蒙层是否关闭 | `boolean` | `true` |
+| content | 内容 | `ReactNode` | - |
+| destroyOnClose | 不可见时是否销毁 `DOM` 结构 | `boolean` | `false` |
+| disableBodyScroll | 是否禁用 `body` 滚动 | `boolean` | `true` |
+| forceRender | 强制渲染 `DOM` | `boolean` | `false` |
+| getContainer | 自定义弹窗的父节点 | `HTMLElement \| (() => HTMLElement) \| null` | `document.body` |
+| header | 顶部的自定义区域 | `ReactNode` | - |
+| image | 图片 `url` | `string` | - |
+| mask | 是否展示蒙层 | `boolean` | `true` |
+| onClose | 关闭事件 | `() => void` | - |
+| onConfirm | 确认事件 | `() => void` | - |
+| showCloseButton | 是否展示关闭按钮 | `boolean` | `false` |
+| stopPropagation | 阻止某些事件的冒泡 | `PropagationEvent[]` | `['click', 'touchmove']` |
+| title | 标题 | `ReactNode` | - |
+| visible | 是否显示 | `boolean` | `false` |
+
+### CSS 变量
+
+| 属性 | 说明 | 默认值 | 全局变量 |
+| --- | --- | --- | --- |
+| `--background-color` | 对话框背景色 | `var(--adm-color-background)` | `--adm-modal-background-color` |
+| `--border-radius` | 圆角大小 | `8px` | `--adm-modal-border-radius` |
+| `--close-button-color` | 关闭按钮颜色 | `#999` | `--adm-modal-close-button-color` |
+| `--content-color` | 内容文本颜色 | `var(--adm-color-weak)` | `--adm-modal-content-color` |
+| `--content-font-size` | 内容文本字号 | `15px` | `--adm-modal-content-font-size` |
+| `--header-color` | 头部文本颜色 | `var(--adm-color-text)` | `--adm-modal-header-color` |
+| `--header-font-size` | 头部文本字号 | `18px` | `--adm-modal-header-font-size` |
+| `--image-height` | 图片高度 | `128px` | `--adm-modal-image-height` |
+| `--image-width` | 图片宽度 | `128px` | `--adm-modal-image-width` |
+| `--z-index` | 对话框层级 | `1000` | `--adm-modal-z-index` |
+
+### 命令式 API
+
+`MobileModal` 同时提供了命令式的 API，可以直接调用 `show`、`alert`、`confirm` 方法。
+
+#### `MobileModal.show(props)`
+
+显示弹窗，`props` 同 [属性](#属性) 一致。返回的 `handler` 对象支持 `close` 方法。
+
+#### `MobileModal.alert(props)`
+
+显示警告弹窗，相比于 `MobileModal.show`，它会默认带有一个"我知道了"按钮。返回的 `handler` 对象支持 `close` 方法。
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| confirmText | 确认按钮的文字 | `string` | `'我知道了'` |
+| onConfirm | 点击确认按钮时触发 | `() => void` | - |
+
+此外，还支持上面 `MobileModal.show` 中大部分的属性（除 `actions` 外）。
+
+#### `MobileModal.confirm(props)`
+
+显示确认弹窗，相比于 `MobileModal.show`，它会默认带有"取消"和"确认"两个按钮。返回的 `handler` 对象支持 `close` 方法。
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| cancelText | 取消按钮的文字 | `string` | `'取消'` |
+| confirmText | 确认按钮的文字 | `string` | `'确认'` |
+| onCancel | 点击取消按钮时触发 | `() => void` | - |
+| onConfirm | 点击确认按钮时触发 | `() => void` | - |
+
+此外，还支持上面 `MobileModal.show` 中大部分的属性（除 `actions` 外）。
+
+---
+
+### 气泡弹出框 Popover
+
+# 气泡弹出框 Popover
+
+点击或长按触发的气泡弹出框，基于浮层弹出能力实现，常用于补充说明或快捷操作。基于 antd-mobile Popover 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+- 需要在某个元素旁边弹出一段补充说明或操作菜单时使用。
+- 适用于对触发元素进行上下左右四个方向的气泡定位。
+- 需要带有菜单项的气泡弹出框，可以使用 `MobilePopover.Menu` 子组件。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/popover-basic.tsx"></code>
+
+## API
+
+继承 antd-mobile [PopoverProps](https://mobile.ant.design/zh/components/popover#api)，完整支持以下属性。
+
+### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| children | 触发 `Popover` 的元素 | `ReactNode` | - |
+| content | 气泡的内容 | `ReactNode` | - |
+| defaultVisible | 默认是否显隐 | `boolean` | `false` |
+| destroyOnHide | 隐藏时是否销毁 `DOM` 结构 | `boolean` | `false` |
+| getContainer | 自定义 `Popover` 的父节点 | `() => HTMLElement` | `() => document.body` |
+| getPopupContainer | 配置 `Popover` 的渲染位置 | `(triggerNode: HTMLElement) => HTMLElement` | - |
+| onVisibleChange | 显隐状态改变时的回调 | `(visible: boolean) => void` | - |
+| placement | 气泡的位置 | `'top' \| 'bottom' \| 'left' \| 'right' \| 'top-start' \| 'top-end' \| 'bottom-start' \| 'bottom-end' \| 'left-start' \| 'left-end' \| 'right-start' \| 'right-end'` | `'top'` |
+| stopPropagation | 阻止某些事件的冒泡 | `PropagationEvent[]` | `['click']` |
+| trigger | 触发方式 | `'click'` | - |
+| visible | 显隐 | `boolean` | - |
+
+### MobilePopover.Menu 属性
+
+`MobilePopover.Menu` 是 `MobilePopover` 的子组件，用于实现带菜单项的气泡弹出框。
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| actions | 菜单项列表 | `PopoverMenuAction[]` | - |
+| onAction | 点击选项时触发 | `(action: PopoverMenuAction) => void` | - |
+
+此外，`MobilePopover.Menu` 还支持上面 [Popover 属性](#属性) 的大部分属性（除 `content` 外）。
+
+### PopoverMenuAction
+
+`MobilePopover.Menu` 的 `actions` 属性每一项。
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| danger | 是否为危险操作 | `boolean` | `false` |
+| disabled | 是否禁用 | `boolean` | `false` |
+| icon | 图标 | `ReactNode` | - |
+| key | 唯一标记 | `string` | - |
+| onClick | 点击事件 | `() => void` | - |
+| text | 文本 | `ReactNode` | - |
+
+### CSS 变量
+
+| 属性 | 说明 | 默认值 | 全局变量 |
+| --- | --- | --- | --- |
+| `--background` | 气泡背景色 | `var(--adm-color-background)` | `--adm-popover-background` |
+| `--arrow-size` | 箭头大小 | `8px` | `--adm-popover-arrow-size` |
+| `--content-padding` | 内容区域的 `padding` | `8px 12px` | `--adm-popover-content-padding` |
+| `--text-color` | 文本颜色 | `var(--adm-color-text)` | `--adm-popover-text-color` |
+| `--z-index` | 元素的 `z-index` | `1030` | `--adm-popover-z-index` |
+
+### FAQ
+
+#### 为什么 `trigger="hover"` 无效？
+
+`MobilePopover` 目前仅支持 `trigger="click"` 触发方式，`hover` 触发方式在移动端存在 300ms 延迟和触摸冲突问题，因此不支持。
+
+#### 为什么 `getPopupContainer` 不生效？
+
+`getPopupContainer` 是 `@floating-ui` 提供的 API，用于配置 `Popover` 的渲染位置。如果设置了 `getContainer`，会优先使用 `getContainer`。
+
+---
+
+### 弹出层 Popup
+
+# 弹出层 Popup
+
+其他弹层组件的基础封装，支持上、下、左、右四个方向弹出。基于 antd-mobile Popup 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+- 需要从屏幕四个方向（上下左右）滑入滑出的弹出层容器。
+- 常作为 `MobilePicker`、`MobileDialog` 等组件的底层弹出层能力。
+- 适用于需要承载自定义内容的弹出场景，通过 `bodyClassName` 和 `bodyStyle` 自定义内容区样式。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/popup-basic.tsx"></code>
+
+## API
+
+继承 antd-mobile [PopupProps](https://mobile.ant.design/zh/components/popup#api)，完整支持以下属性。
+
+### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| afterClose | `MobilePopup` 完全关闭后的回调 | `() => void` | - |
+| afterShow | `MobilePopup` 完全展示后的回调 | `() => void` | - |
+| bodyClassName | 设置 `MobilePopup` 内容区域的 `class` | `string` | - |
+| bodyStyle | 设置 `MobilePopup` 内容区域的样式 | `React.CSSProperties` | - |
+| children | 弹窗内容 | `ReactNode` | - |
+| closeOnMaskClick | 点击蒙层是否关闭 | `boolean` | `true` |
+| destroyOnClose | 不可见时是否销毁 `DOM` 结构 | `boolean` | `false` |
+| disableBodyScroll | 是否禁用 `body` 滚动 | `boolean` | `true` |
+| forceRender | 强制渲染 `DOM` | `boolean` | `false` |
+| getContainer | 自定义弹窗的父节点 | `HTMLElement \| (() => HTMLElement) \| null` | `document.body` |
+| mask | 是否展示蒙层 | `boolean` | `true` |
+| maskClassName | 蒙层的 `class` | `string` | - |
+| onMaskClick | 点击蒙层触发 | `() => void` | - |
+| opacity | 蒙层的透明度 | `number` | - |
+| position | 弹出位置 | `'top' \| 'bottom' \| 'left' \| 'right'` | `'bottom'` |
+| stopPropagation | 阻止某些事件的冒泡 | `PropagationEvent[]` | `['click', 'touchmove']` |
+| visible | 是否显示 | `boolean` | `false` |
+
+### CSS 变量
+
+| 属性 | 说明 | 默认值 | 全局变量 |
+| --- | --- | --- | --- |
+| `--background-color` | 内容区域背景色 | `var(--adm-color-background)` | `--adm-popup-background-color` |
+| `--border-radius` | 圆角大小 | `0` | `--adm-popup-border-radius` |
+| `--z-index` | 元素的 `z-index` | `1000` | `--adm-popup-z-index` |
+
+---
+
+### 进度条 ProgressBar
+
+# 进度条 ProgressBar
+
+展示操作的当前进度。基于 antd-mobile ProgressBar 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+- 当需要展示一个操作（如上传、下载、表单提交等）的当前进度时使用。
+- 适用于线性、水平的进度展示场景。
+- 如果需要环形（圆形）进度展示，请使用 `MobileProgressCircle`。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/progressbar-basic.tsx"></code>
+
+## API
+
+继承 antd-mobile [ProgressBarProps](https://mobile.ant.design/zh/components/progress-bar#api)，完整支持以下属性。
+
+### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| percent | 进度百分比 | `number` | `0` |
+| rounded | 圆角的进度条 | `boolean` | `false` |
+| text | 是否显示进度文字（要配合 `children` 一起使用） | `boolean` | `false` |
+
+此外，还支持 [antd-mobile 通用 Props](https://mobile.ant.design/zh/guide/theming#通用-css-变量-1)（`className`、`style` 等）。
+
+### CSS 变量
+
+| 属性 | 说明 | 默认值 | 全局变量 |
+| --- | --- | --- | --- |
+| `--fill-color` | 填充色 | `var(--adm-color-primary)` | `--adm-progress-bar-fill-color` |
+| `--height` | 进度条高度 | `3px` | `--adm-progress-bar-height` |
+| `--text-color` | 进度文字颜色 | `var(--adm-color-primary)` | `--adm-progress-bar-text-color` |
+| `--text-width` | 进度文字宽度 | `28px` | `--adm-progress-bar-text-width` |
+| `--track-color` | 背景轨道色 | `var(--adm-color-border)` | `--adm-progress-bar-track-color` |
+| `--track-transition-duration` | 轨道的过渡时长 | `0.3s` | `--adm-progress-bar-track-transition-duration` |
+
+---
+
+### 进度圈 ProgressCircle
+
+# 进度圈 ProgressCircle
+
+以圆形的方式展示操作的当前进度。基于 antd-mobile ProgressCircle 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+- 当需要以环形（圆形）的方式展示一个操作的当前进度时使用。
+- 适用于页面局部、卡片、图标旁边的进度展示。
+- 如果需要线性（水平）进度展示，请使用 `MobileProgressBar`。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/progresscircle-basic.tsx"></code>
+
+## API
+
+继承 antd-mobile [ProgressCircleProps](https://mobile.ant.design/zh/components/progress-circle#api)，完整支持以下属性。
+
+### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| children | 自定义内部内容 | `ReactNode` | - |
+| percent | 进度百分比 | `number` | `0` |
+
+此外，还支持 [antd-mobile 通用 Props](https://mobile.ant.design/zh/guide/theming#通用-css-变量-1)（`className`、`style` 等）。
+
+### CSS 变量
+
+| 属性 | 说明 | 默认值 | 全局变量 |
+| --- | --- | --- | --- |
+| `--fill-color` | 填充色 | `var(--adm-color-primary)` | `--adm-progress-circle-fill-color` |
+| `--size` | 进度圈的大小 | `50px` | `--adm-progress-circle-size` |
+| `--text-color` | 内部文字颜色 | `var(--adm-color-primary)` | `--adm-progress-circle-text-color` |
+| `--track-color` | 背景轨道色 | `var(--adm-color-border)` | `--adm-progress-circle-track-color` |
+| `--track-width` | 进度圈的线条宽度 | `3px` | `--adm-progress-circle-track-width` |
+
+---
+
+### 下拉刷新 PullToRefresh
+
+# 下拉刷新 PullToRefresh
+
+用于下拉刷新的组件，支持下拉到一定距离后触发刷新回调。基于 antd-mobile PullToRefresh 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+- 当列表、卡片等内容需要支持用户下拉刷新数据时使用。
+- 适用于需要重新加载最新数据的场景。
+- 常与 `MobileList`、`MobileInfiniteScroll` 等组件配合使用，形成完整的分页与刷新体验。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/pulltorefresh-basic.tsx"></code>
+
+## API
+
+继承 antd-mobile [PullToRefreshProps](https://mobile.ant.design/zh/components/pull-to-refresh#api)，完整支持以下属性。
+
+### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| children | `PullToRefresh` 内部内容 | `ReactNode` | - |
+| completeDelay | `complete` 状态持续的时间，单位为毫秒 | `number` | `0` |
+| headHeight | 头部提示区域的高度，单位为 `px` | `number` | `40` |
+| onRefresh | 触发刷新时的处理函数（必须返回 `Promise`） | `() => Promise<any>` | - |
+| renderText | 根据 `status` 渲染对应的提示文字或节点 | `(status: RefreshStatus) => ReactNode` | 内置 |
+| threshold | 触发刷新所需的最小下拉距离，单位为 `px` | `number` | `headHeight` |
+
+### RefreshStatus
+
+`renderText` 函数的参数，表示当前的下拉状态。
+
+| 值 | 说明 |
+| --- | --- |
+| `pulling` | 下拉中，且还没有达到 `threshold` |
+| `canRelease` | 下拉中，且已经达到 `threshold`，松手即可触发刷新 |
+| `refreshing` | 刷新中 |
+| `complete` | 刷新完成 |
+
+### CSS 变量
+
+| 属性 | 说明 | 默认值 | 全局变量 |
+| --- | --- | --- | --- |
+| `--color` | 内容区文字颜色 | `var(--adm-color-weak)` | `--adm-pull-to-refresh-color` |
+| `--content-padding` | 内容区域的 `padding` | `8px 0` | `--adm-pull-to-refresh-content-padding` |
+
+---
+
+### 结果 Result
+
+# 结果 Result
+
+用于反馈一系列操作任务的处理结果。基于 antd-mobile Result 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+- 当一个操作任务执行完毕（如提交表单、支付订单、审核等）时，用于展示处理结果反馈。
+- 内置 `success`、`error`、`info`、`waiting`、`warning` 五种场景。
+- 适用于页面级别的重要结果展示（占据较大空间）。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/result-basic.tsx"></code>
+
+## API
+
+继承 antd-mobile [ResultProps](https://mobile.ant.design/zh/components/result#api)，完整支持以下属性。
+
+### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| children | 自定义底部内容 | `ReactNode` | - |
+| description | 描述 | `ReactNode` | - |
+| icon | 自定义 `icon` | `ReactNode` | - |
+| status | 状态类型 | `'success' \| 'error' \| 'info' \| 'waiting' \| 'warning'` | `'info'` |
+| title | 标题 | `ReactNode` | - |
+
+### CSS 变量
+
+| 属性 | 说明 | 默认值 | 全局变量 |
+| --- | --- | --- | --- |
+| `--border-color` | 底部按钮区域的边框色 | `var(--adm-color-border)` | `--adm-result-border-color` |
+| `--box-padding` | 容器的 `padding` | `20px 12px` | `--adm-result-box-padding` |
+| `--description-color` | 描述文字颜色 | `var(--adm-color-weak)` | `--adm-result-description-color` |
+| `--description-font-size` | 描述文字字号 | `var(--adm-font-size-9)` | `--adm-result-description-font-size` |
+| `--icon-padding` | `icon` 区域的 `padding` | `0` | `--adm-result-icon-padding` |
+| `--image-width` | 内置 `icon` 的大小 | `72px` | `--adm-result-image-width` |
+| `--title-color` | 标题文字颜色 | `var(--adm-color-text)` | `--adm-result-title-color` |
+| `--title-font-size` | 标题文字字号 | `var(--adm-font-size-10)` | `--adm-result-title-font-size` |
+| `--title-line-height` | 标题文字行高 | `1.4` | `--adm-result-title-line-height` |
+
+---
+
+### 骨架屏 Skeleton
+
+# 骨架屏 Skeleton
+
+在需要等待加载内容的位置提供一个占位图形组合。基于 antd-mobile Skeleton 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+- 网络较慢需要长时间等待加载处理，或列表、详情等内容布局复杂时使用。
+- 用于在内容区域未加载出来之前展示页面大致结构，降低用户等待焦虑。
+- 只在第一次加载数据时显示骨架屏，一旦有真实数据就不再展示。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/skeleton-basic.tsx"></code>
+
+## API
+
+继承 antd-mobile [SkeletonProps](https://mobile.ant.design/zh/components/skeleton#api)，完整支持以下属性。
+
+### MobileSkeleton 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| animated | 是否启用动画 | `boolean` | `false` |
+
+此外，还支持 [antd-mobile 通用 Props](https://mobile.ant.design/zh/guide/theming#通用-css-变量-1)（`className`、`style` 等）。
+
+### MobileSkeleton.Title 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| animated | 是否启用动画 | `boolean` | `false` |
+
+`MobileSkeleton.Title` 是 `MobileSkeleton` 的子组件，用于显示标题的占位图形，参数类型与 `MobileSkeleton` 完全一致。
+
+### MobileSkeleton.Paragraph 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| animated | 是否启用动画 | `boolean` | `false` |
+| lineCount | 段落的行数 | `number` | `2` |
+
+`MobileSkeleton.Paragraph` 是 `MobileSkeleton` 的子组件，用于显示段落的占位图形。
+
+### CSS 变量
+
+| 属性 | 说明 | 默认值 | 全局变量 |
+| --- | --- | --- | --- |
+| `--background-color` | 背景色 | `var(--adm-color-border)` | `--adm-skeleton-background-color` |
+| `--border-radius` | 圆角 | `8px` | `--adm-skeleton-border-radius` |
+| `--height` | 高度 | `auto` | `--adm-skeleton-height` |
+| `--width` | 宽度 | `100%` | `--adm-skeleton-width` |
+
+---
+
+### 滑动操作 SwipeAction
+
+# 滑动操作 SwipeAction
+
+左右滑动的动作面板，常用于列表项单元格。基于 antd-mobile SwipeAction 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+- 在列表项中，用户可以通过左右滑动展示一组操作按钮（如删除、收藏、置顶等）。
+- 适用于需要为列表项提供快捷操作的场景。
+- 常与 `MobileList`、`MobileListItem` 配合使用。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/swipeaction-basic.tsx"></code>
+
+## API
+
+继承 antd-mobile [SwipeActionProps](https://mobile.ant.design/zh/components/swipe-action#api)，完整支持以下属性。
+
+### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| children | `SwipeAction` 包裹的元素 | `ReactNode` | - |
+| closeOnAction | 点击 `action` 时是否自动关闭 | `boolean` | `false` |
+| closeOnTouchOutside | 点击 `SwipeAction` 外部时是否自动关闭 | `boolean` | `false` |
+| defaultOpen | 默认打开状态，是个数组，默认为 `[false, false]`，分别表示左右两边的 action 是否打开 | `[boolean, boolean]` | `[false, false]` |
+| leftActions | 左侧的操作按钮 | `Action[]` | `[]` |
+| onAction | 点击 `action` 时触发 | `(action: Action) => void` | - |
+| onActionsReveal | 当操作按钮完全展开时触发 | `() => void` | - |
+| onClose | 当 `SwipeAction` 关闭时触发 | `() => void` | - |
+| onOpen | 当 `SwipeAction` 打开时触发 | `(direction: 'left' \| 'right') => void` | - |
+| rightActions | 右侧的操作按钮 | `Action[]` | `[]` |
+| stopPropagation | 阻止某些事件的冒泡 | `PropagationEvent[]` | `[]` |
+
+### Action
+
+`leftActions` 和 `rightActions` 属性的每一项。
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| className | 添加到对应按钮的 `class` | `string` | - |
+| color | 按钮的颜色 | `'default' \| 'primary' \| 'success' \| 'warning' \| 'danger' \| 'light'` | `'default'` |
+| key | 唯一标记 | `string` | - |
+| onClick | 点击事件 | `(e: React.MouseEvent) => void` | - |
+| style | 添加到对应按钮的 `style` | `React.CSSProperties` | - |
+| text | 文本 | `ReactNode` | - |
+
+### Ref
+
+| 属性 | 说明 | 类型 |
+| --- | --- | --- |
+| close | 关闭 `SwipeAction` | `() => void` |
+| show | 展示 `SwipeAction` 的某一侧，`left` 或 `right` | `(side: 'left' \| 'right') => void` |
+
+### CSS 变量
+
+| 属性 | 说明 | 默认值 | 全局变量 |
+| --- | --- | --- | --- |
+| `--background-color` | 操作按钮背景色 | `var(--adm-color-light)` | `--adm-swipe-action-background-color` |
+| `--transition-duration` | 动画过渡时间 | `300ms` | `--adm-swipe-action-transition-duration` |
+
+---
+
+### 轻提示 Toast
+
+# 轻提示 Toast
+
+全局展示操作反馈信息，在页面顶部居中显示，并自动消失。基于 antd-mobile Toast 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+- 可用于页面操作后的轻量级反馈（成功、失败、警告、加载中等提示）。
+- 适用于不希望打断用户当前操作流程的场景，提示信息会在短暂时间后自动消失。
+- `MobileToast` 只提供命令式 API `MobileToast.show`，不支持组件式声明使用。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/toast-basic.tsx"></code>
+
+## API
+
+继承 antd-mobile [ToastProps](https://mobile.ant.design/zh/components/toast#api)，完整支持以下属性。
+
+### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| afterClose | `MobileToast` 完全关闭后的回调 | `() => void` | - |
+| content | 提示内容 | `ReactNode` | - |
+| duration | 提示存在的时间，单位为毫秒，设为 `0` 时不会自动消失 | `number` | `1500` |
+| getContainer | 自定义轻提示的父节点 | `HTMLElement \| (() => HTMLElement) \| null` | `document.body` |
+| icon | 提示的图标，有 `'success'` `'fail'` `'loading'` 三种内置类型，也支持自定义图标 | `'success' \| 'fail' \| 'loading' \| ReactNode` | - |
+| maskClassName | 遮罩类名 | `string` | - |
+| maskClickable | 蒙层是否允许点击穿透 | `boolean` | `true` |
+| position | 展示位置，优先级高于全局配置中的 `position` | `'top' \| 'bottom' \| 'center'` | `'center'` |
+| stopPropagation | 阻止某些事件的冒泡 | `PropagationEvent[]` | `['click', 'touchmove']` |
+
+### CSS 变量
+
+| 属性 | 说明 | 默认值 | 全局变量 |
+| --- | --- | --- | --- |
+| `--background-color` | 背景色 | `rgba(0, 0, 0, 0.7)` | `--adm-toast-background-color` |
+| `--border-radius` | 圆角大小 | `8px` | `--adm-toast-border-radius` |
+| `--content-color` | 文字颜色 | `#ffffff` | `--adm-toast-content-color` |
+| `--icon-size` | 图标大小 | `36px` | `--adm-toast-icon-size` |
+| `--text-padding` | 文字区域 `padding` 大小 | `8px 16px 0` | `--adm-toast-text-padding` |
+| `--z-index` | toast 元素的 `z-index` | `1100` | `--adm-toast-z-index` |
+
+### 命令式 API
+
+`MobileToast` 同时提供了命令式的 API，可以直接调用 `show`、`clear`、`config` 方法。
+
+#### `MobileToast.show(props)`
+
+显示 `MobileToast`，传入的 `props` 支持除 `afterClose` 之外的所有 [属性](#属性)。返回的 `handler` 对象支持 `close` 方法。
+
+#### `MobileToast.clear()`
+
+清除当前 `MobileToast`。
+
+#### `MobileToast.config(duration)`
+
+全局配置。
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| duration | 提示存在的时间，单位为毫秒，设为 `0` 时不会自动消失 | `number` | `1500` |
+| mask | 是否存在背景蒙层 | `boolean` | `true` |
+| position | 显示位置 | `'top' \| 'bottom' \| 'center'` | `'center'` |
+
+### FAQ
+
+#### 为什么 `MobileToast.show` 不能在组件顶层调用？
+
+`MobileToast.show` 是一个命令式 API，它必须在事件回调（如 `onClick`）或 `useEffect` 中调用。如果直接在组件函数体中调用，可能会因为 React 渲染时序问题导致提示闪烁或不显示。
+
+---
+
+## 引导提示（4 个）
+
+### 徽标 Badge
+
+# 徽标 Badge
+
+在右上角展示数字、文字、小红点。适用于产品化的新消息、新功能、新服务等内容的提醒，通过醒目视觉形式吸引用户处理。基于 antd-mobile Badge 封装，注入企业品牌主题色，Props 完美透传。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/badge-basic.tsx"></code>
+
+## API
+
+继承 antd-mobile [BadgeProps](https://mobile.ant.design/zh/components/badge#api)，完整支持以下属性。
+
+### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| bordered | 是否增加描边 | `boolean` | `false` |
+| color | 徽标背景色，等效于设置 `--color` CSS 变量 | `string` | - |
+| content | 徽标内容：如果传 `null` `undefined` `''` 或不传，则不显示徽标；如果传 `Badge.dot`，会显示小红点 | `React.ReactNode \| typeof Badge.dot` | - |
+| wrapperClassName | Badge wrap 自定义类名 | `string` | - |
+| wrapperStyle | Badge wrap 自定义样式 | `React.CSSProperties` | - |
+
+### CSS 变量
+
+通过 CSS 变量可自定义徽标样式，企业主题已统一注入品牌色。
+
+| 属性 | 说明 | 默认值 | 全局变量 |
+| --- | --- | --- | --- |
+| `--color` | 徽标背景色 | `var(--adm-color-highlight)` | `--adm-badge-color` |
+| `--right` | 相对于最右边，向左的偏移量 | `0` | - |
+| `--top` | 相对于最上边，向下的偏移量 | `0` | - |
+
+---
+
+### 浮动气泡 FloatingBubble
+
+# 浮动气泡 FloatingBubble
+
+悬浮在页面边缘的圆形交互按钮，支持自由拖拽与自动吸附到边缘。常用于快捷操作入口，如客服咨询、返回顶部、一键反馈等。基于 antd-mobile FloatingBubble 封装，注入企业品牌主题色，Props 完美透传。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/floatingbubble-basic.tsx"></code>
+
+## API
+
+继承 antd-mobile [FloatingBubbleProps](https://mobile.ant.design/zh/components/floating-bubble#api)，完整支持以下属性。
+
+### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| axis | 拖拽的方向，`'x'` 只能在 x 轴拖动，`'y'` 只能在 y 轴拖动，`'xy'` 可在 x/y 轴同时拖动，`'none'` 不可拖动 | `'x' \| 'y' \| 'xy' \| 'none'` | `'y'` |
+| boundary | 拖拽的边界范围，是一个函数，接收 body 元素并返回边界对象 | `(bodyEl: HTMLElement) => Boundary \| Promise<Boundary>` | `默认值` |
+| children | 气泡内容 | `ReactNode` | - |
+| magnetic | 磁吸效果，拖拽结束后自动吸附到最近的一侧 | `'x' \| 'y'` | - |
+| onClick | 点击事件（注意：拖拽结束时不会触发） | `(event: React.MouseEvent) => void` | - |
+
+### CSS 变量
+
+通过 CSS 变量可自定义浮动气泡样式，企业主题已统一注入品牌色。
+
+| 属性 | 说明 | 默认值 | 全局变量 |
+| --- | --- | --- | --- |
+| `--background` | 气泡背景色 | `var(--adm-color-primary)` | `--adm-floating-bubble-background` |
+| `--border-radius` | 圆角大小 | `999px` | `--adm-floating-bubble-border-radius` |
+| `--edge-distance` | 吸附时距离屏幕边缘的距离 | `8px` | `--adm-floating-bubble-edge-distance` |
+| `--size` | 气泡大小（宽高） | `48px` | `--adm-floating-bubble-size` |
+| `--z-index` | 气泡的 z-index | `1000` | `--adm-floating-bubble-z-index` |
+
+### Ref
+
+| 属性 | 说明 | 类型 |
+| --- | --- | --- |
+| `nativeElement` | 原始 div 元素 | `HtmlDivElement \| null` |
+
+---
+
+### 通告栏 NoticeBar
+
+# 通告栏 NoticeBar
+
+在导航栏下方，用于给用户显示提示消息。常用于跑马灯公告、活动提醒、系统通知等场景。基于 antd-mobile NoticeBar 封装，注入企业品牌主题色，Props 完美透传。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/noticebar-basic.tsx"></code>
+
+## API
+
+继承 antd-mobile [NoticeBarProps](https://mobile.ant.design/zh/components/notice-bar#api)，完整支持以下属性。
+
+### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| closeIcon | 关闭按钮图标 | `ReactNode` | `<CloseOutline />` |
+| closeMode | 关闭模式 | `'default' \| 'closable' \| 'closeIcon'` | `'default'` |
+| color | 通告栏的类型，会影响背景色和文字色 | `'default' \| 'alert' \| 'error' │ 'info'` | `'default'` |
+| content | 通告栏的内容 | `ReactNode` | - |
+| delay | 滚动延迟时长，单位 ms，仅当开启 marquee 时生效 | `number` | `1000` |
+| extra | 额外内容，显示在关闭按钮右侧 | `ReactNode` | - |
+| icon | 左侧图标 | `ReactNode` | `<SoundOutline />` |
+| marqueeProps | 跑马灯相关属性 | `MarqueeProps` | - |
+| onClose | 关闭时的回调函数 | `() => void` | - |
+| onClick | 点击事件 | `(e: React.MouseEvent) => void` | - |
+| speed | 跑马灯滚动的速度 | `number` | `50` |
+| standTime | 当有多条通告栏时，每条通告栏停留的时间，仅当 `closeMode` 为 `'closable'` 时生效 | `number` | `1000` |
+| wrap | 是否多行展示 | `boolean` | `false` |
+
+### CSS 变量
+
+通过 CSS 变量可自定义通告栏样式，企业主题已统一注入品牌色。
+
+| 属性 | 说明 | 默认值 | 全局变量 |
+| --- | --- | --- | --- |
+| `--background-color` | 背景色 | `var(--adm-color-background)` | `--adm-notice-bar-background-color` |
+| `--border-color` | 边框色 | `var(--adm-color-border)` | `--adm-notice-bar-border-color` |
+| `--font-size` | 文字大小 | `15px` | `--adm-notice-bar-font-size` |
+| `--height` | 高度 | `40px` | `--adm-notice-bar-height` |
+| `--icon-font-color` | 左侧图标颜色 | `var(--adm-color-primary)` | `--adm-notice-bar-icon-font-color` |
+| `--text-color` | 文字颜色 | `var(--adm-color-text)` | `--adm-notice-bar-text-color` |
+
+---
+
+### 滚动遮罩 ScrollMask
+
+# 滚动遮罩 ScrollMask
+
+在可滚动容器的顶部或底部渲染渐变遮罩，通过视觉提示告诉用户该区域内容可继续滑动。常用于 List、长文本、Tab 等横向或纵向滚动场景。基于 antd-mobile ScrollMask 封装，注入企业品牌主题色，Props 完美透传。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/scrollmask-basic.tsx"></code>
+
+## API
+
+继承 antd-mobile [ScrollMaskProps](https://mobile.ant.design/zh/components/list#api)，完整支持以下属性。ScrollMask 本身是一个可滚动容器，组件内部会同时承载内容与遮罩层。
+
+### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| tracks | 指定要显示遮罩的边，可配置多边（空格分隔），`'all'` 表示上下左右都显示 | `'all' \| 'top bottom' \| 'left right' \| 'top' \| 'bottom' \| 'left' \| 'right'` | `'all'` |
+
+此外，`MobileScrollMask` 完美透传原生 `div` 元素的所有属性（`className`、`style`、`onScroll`、`ref` 等），可作为滚动容器直接使用。
+
+### CSS 变量
+
+通过 CSS 变量可自定义遮罩样式，企业主题已统一注入品牌色。
+
+| 属性 | 说明 | 默认值 | 全局变量 |
+| --- | --- | --- | --- |
+| `--mask-color` | 遮罩渐变末端的背景色（需与容器背景保持一致） | `#ffffff` | `--adm-scroll-mask-color` |
+
+---
+
+## 试验性（6 个）
+
+### 日历视图 CalendarPickerView
+
+# 日历视图 CalendarPickerView
+
+移动端日历视图组件，用于直接平铺展示日历面板并选择日期或日期范围。基于 antd-mobile CalendarPickerView 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+当需要把日历直接铺在页面中（不依赖弹层）用于选择日期时使用，常与表单、统计页配合。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/calendarpickerview-basic.tsx"></code>
+
+## API
+
+### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| title | 标题 | `ReactNode \| false` | - |
+| confirmText | 确认按钮文字（仅在 MobileCalendarPicker 弹层内有效） | `string` | - |
+| weekStartsOn | 每周的第一天 | `'Monday' \| 'Sunday'` | `'Sunday'` |
+| renderTop | 自定义日期单元格顶部内容 | `((date: Date) => ReactNode) \| false` | - |
+| renderDate | 自定义日期单元格内容 | `(date: Date) => ReactNode` | - |
+| renderBottom | 自定义日期单元格底部内容 | `((date: Date) => ReactNode) \| false` | - |
+| allowClear | 是否允许清除 | `boolean` | `true` |
+| max | 允许选择的最大日期 | `Date` | - |
+| min | 允许选择的最小日期 | `Date` | - |
+| shouldDisableDate | 判断日期是否应该被禁用 | `(date: Date) => boolean` | - |
+| selectionMode | 选择模式 | `'single' \| 'range'` | - |
+| value | 当前选中的日期，受控 | `Date \| null \| [Date, Date]` | - |
+| defaultValue | 默认选中的日期，非受控 | `Date \| null \| [Date, Date]` | - |
+| onChange | 值变化时的回调 | `(val: Date \| null \| [Date, Date]) => void` | - |
+
+### Ref
+
+| 名称 | 说明 | 类型 |
+| --- | --- | --- |
+| jumpTo | 跳转到指定页（年月） | `(page: Page \| ((page: Page) => Page)) => void` |
+| jumpToToday | 跳转到今天所在的页 | `() => void` |
+| getDateRange | 获取当前可视范围的日期区间 | `() => DateRange` |
+
+### CSS 变量
+
+| 属性 | 说明 | 默认值 |
+| --- | --- | --- |
+| `--adm-color-primary` | 选中态主色 | `#1677ff` |
+| `--adm-color-text` | 普通日期文本色 | - |
+| `--adm-color-light` | 非当月日期文本色 | - |
+| `--adm-color-white` | 选中态文本色 | - |
+| `--adm-color-border` | 分隔线色 | - |
+| `--adm-color-box` | 标题栏背景色 | - |
+
+> 完整的 CalendarPickerViewProps 继承自 antd-mobile [CalendarPickerViewProps](https://mobile.ant.design/zh/components/calendar-picker-view#api)，主题色由全局 CSS 变量统一注入。
+
+---
+
+### 日历选择器 CalendarPicker
+
+# 日历选择器 CalendarPicker
+
+移动端日历选择器，支持通过弹层方式选择日期或日期范围。基于 antd-mobile CalendarPicker 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+当需要通过弹层（而非整页）的形式让用户选择一个或一段日期时使用，常用于表单项内触发。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/calendarpicker-basic.tsx"></code>
+
+## API
+
+### 属性
+
+继承 MobileCalendarPickerView 的全部属性，并扩展以下弹层相关属性：
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| visible | 是否显示弹层 | `boolean` | `false` |
+| confirmText | 确认按钮文字 | `string` | - |
+| popupClassName | 弹层 className | `string` | - |
+| popupStyle | 弹层 style | `React.CSSProperties` | - |
+| popupBodyStyle | 弹层 body 区域 style | `React.CSSProperties` | - |
+| forceRender | 是否在隐藏时也强制渲染 | `true` | - |
+| closeOnMaskClick | 点击遮罩是否关闭 | `boolean` | `true` |
+| onClose | 关闭弹层时回调 | `() => void` | - |
+| onMaskClick | 点击遮罩时的回调 | `() => void` | - |
+| getContainer | 弹层挂载的父节点 | `GetContainer` | - |
+| title | 弹层标题 | `ReactNode \| false` | - |
+| weekStartsOn | 每周的第一天 | `'Monday' \| 'Sunday'` | `'Sunday'` |
+| renderTop | 自定义日期单元格顶部内容 | `((date: Date) => ReactNode) \| false` | - |
+| renderDate | 自定义日期单元格内容 | `(date: Date) => ReactNode` | - |
+| renderBottom | 自定义日期单元格底部内容 | `((date: Date) => ReactNode) \| false` | - |
+| allowClear | 是否允许清除 | `boolean` | `true` |
+| selectionMode | 选择模式 | `'single' \| 'range'` | - |
+| value | 当前选中值 | `Date \| null \| [Date, Date]` | - |
+| defaultValue | 默认选中值 | `Date \| null \| [Date, Date]` | - |
+| onChange | 值变化回调 | `(val) => void` | - |
+| onConfirm | 确认回调（仅开启 selectionMode 时生效） | `(val) => void` | - |
+| max | 允许选择的最大日期 | `Date` | - |
+| min | 允许选择的最小日期 | `Date` | - |
+| shouldDisableDate | 判断日期是否应该被禁用 | `(date: Date) => boolean` | - |
+
+### Ref
+
+| 名称 | 说明 | 类型 |
+| --- | --- | --- |
+| jumpTo | 跳转到指定页（年月） | `(page: Page \| ((page: Page) => Page)) => void` |
+| jumpToToday | 跳转到今天所在的页 | `() => void` |
+| getDateRange | 获取当前可视范围的日期区间 | `() => DateRange` |
+
+### CSS 变量
+
+| 属性 | 说明 | 默认值 |
+| --- | --- | --- |
+| `--adm-color-primary` | 选中态主色 | `#1677ff` |
+| `--adm-color-text` | 普通日期文本色 | - |
+| `--adm-color-light` | 非当月日期文本色 | - |
+| `--adm-color-white` | 选中态文本色 | - |
+| `--adm-color-border` | 分隔线色 | - |
+| `--adm-color-box` | 标题栏背景色 | - |
+
+> 完整的 CalendarPickerProps 继承自 antd-mobile [CalendarPickerProps](https://mobile.ant.design/zh/components/calendar-picker#api)，主题色由全局 CSS 变量统一注入。
+
+---
+
+### 日历 Calendar
+
+# 日历 Calendar
+
+移动端日历组件，用于日期选择与展示。基于 antd-mobile Calendar 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+当需要在移动端展示日历、选择单个日期或日期范围（如打卡、预约、签到、行程筛选）时使用。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/calendar-basic.tsx"></code>
+
+## API
+
+### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| selectionMode | 选择模式，设置为 `single` 或 `range` 会开启日期选择能力 | `'single' \| 'range'` | - |
+| value | 当前选中的日期，受控 | `Date \| null \| [Date, Date]` | - |
+| defaultValue | 默认选中的日期，非受控 | `Date \| null \| [Date, Date]` | - |
+| onChange | 选择日期时的回调 | `(val: Date \| null \| [Date, Date]) => void` | - |
+| prevMonthButton | 上个月的按钮 | `ReactNode` | - |
+| prevYearButton | 上一年的按钮 | `ReactNode` | - |
+| nextMonthButton | 下个月的按钮 | `ReactNode` | - |
+| nextYearButton | 下一年的按钮 | `ReactNode` | - |
+| onPageChange | 年或月发生切换时的回调 | `(year: number, month: number) => void` | - |
+| weekStartsOn | 每周的第一天 | `'Monday' \| 'Sunday'` | `'Sunday'` |
+| renderLabel | 自定义日期下方的文字 | `(date: Date) => ReactNode` | - |
+| renderDate | 自定义整个日期单元格的内容 | `(date: Date) => ReactNode` | - |
+| cellRender | 自定义日期单元格，基于原节点二次封装 | `(oriNode: ReactElement, info: { date: Date }) => ReactNode` | - |
+| allowClear | 是否允许再次点击后清除选中 | `boolean` | `true` |
+| max | 允许选择的最大日期 | `Date` | - |
+| min | 允许选择的最小日期 | `Date` | - |
+| shouldDisableDate | 判断日期是否应该被禁用 | `(date: Date) => boolean` | - |
+| minPage | 允许翻页查看的最小页 | `Page` | - |
+| maxPage | 允许翻页查看的最大页 | `Page` | - |
+
+### Ref
+
+| 名称 | 说明 | 类型 |
+| --- | --- | --- |
+| jumpTo | 跳转到指定页（年月） | `(page: Page \| ((page: Page) => Page)) => void` |
+| jumpToToday | 跳转到今天所在的页 | `() => void` |
+
+### CSS 变量
+
+| 属性 | 说明 | 默认值 |
+| --- | --- | --- |
+| `--adm-color-primary` | 选中态主色 | `#1677ff` |
+| `--adm-color-text` | 普通日期文本色 | - |
+| `--adm-color-light` | 非当月日期文本色 | - |
+| `--adm-color-weak` | 周标签文本色 | - |
+| `--adm-color-white` | 选中态文本色 | - |
+| `--adm-color-border` | 底部分隔线色 | - |
+
+> 完整的 CalendarProps 继承自 antd-mobile [CalendarProps](https://mobile.ant.design/zh/components/calendar#api)，主题色由全局 CSS 变量统一注入。
+
+---
+
+### 下拉菜单 Dropdown
+
+# 下拉菜单 Dropdown
+
+移动端下拉菜单组件，用于在页面顶部展开筛选或选项内容。基于 antd-mobile Dropdown 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+当需要在页面顶部以菜单形式向下展开筛选条件、操作选项或多级分类时使用。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/dropdown-basic.tsx"></code>
+
+## API
+
+### MobileDropdown
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| activeKey | 激活项的 key（受控） | `string \| null` | - |
+| defaultActiveKey | 默认激活项的 key | `string \| null` | - |
+| closeOnMaskClick | 点击遮罩是否关闭 | `boolean` | `true` |
+| closeOnClickAway | 点击菜单外部是否关闭 | `boolean` | `false` |
+| onChange | 激活项变化时的回调 | `(key: string \| null) => void` | - |
+| arrowIcon | 统一的箭头图标 | `ReactNode` | - |
+| arrow | 已废弃，请使用 `arrowIcon` | `ReactNode` | - |
+| getContainer | 弹层挂载的父节点 | `PopupProps['getContainer']` | - |
+
+### MobileDropdown.Item
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| key | 唯一标识，必填 | `string` | - |
+| title | 标题 | `ReactNode` | - |
+| active | 是否激活 | `boolean` | - |
+| highlight | 是否高亮 | `boolean` | - |
+| forceRender | 是否强制渲染（隐藏时也保留 DOM） | `boolean` | - |
+| destroyOnClose | 关闭时是否销毁内容 | `boolean` | - |
+| onClick | 点击标题时的回调 | `(event: MouseEvent<HTMLDivElement>) => void` | - |
+| arrowIcon | 单项的箭头图标 | `ReactNode` | - |
+| arrow | 已废弃，请使用 `arrowIcon` | `ReactNode` | - |
+| children | 内容区域 | `ReactNode` | - |
+
+### Ref
+
+| 名称 | 说明 | 类型 |
+| --- | --- | --- |
+| close | 关闭菜单 | `() => void` |
+
+### CSS 变量
+
+| 属性 | 说明 | 默认值 |
+| --- | --- | --- |
+| `--adm-color-background` | 菜单栏背景色 | - |
+| `--adm-color-border` | 底部分隔线色 | - |
+| `--adm-color-light` | 未激活态文字色 | - |
+| `--adm-color-primary` | 激活态文字色 | `#1677ff` |
+| `--adm-font-size-main` | 标题字号 | - |
+
+> 完整的 DropdownProps / DropdownItemProps 继承自 antd-mobile [Dropdown](https://mobile.ant.design/zh/components/dropdown#api)，主题色由全局 CSS 变量统一注入。
+
+---
+
+### 结果页 ResultPage
+
+# 结果页 ResultPage
+
+移动端结果页组件，用于展示流程结束后的处理结果与提示信息。基于 antd-mobile ResultPage 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+当某个流程结束需要给用户展示完整结果页（如提交成功、支付成功、流程失败等）时使用。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/resultpage-basic.tsx"></code>
+
+## API
+
+### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| status | 状态类型，决定默认图标和主题色 | `'success' \| 'error' \| 'info' \| 'waiting' \| 'warning'` | `'info'` |
+| title | 标题 | `ReactNode` | - |
+| description | 描述 | `ReactNode` | - |
+| icon | 自定义图标 | `ReactNode` | - |
+| details | 明细信息列表 | `ResultPageDetail[] \| null` | - |
+| children | 额外的自定义内容 | `ReactNode` | - |
+| primaryButtonText | 主按钮文字 | `ReactNode` | - |
+| secondaryButtonText | 次按钮文字 | `ReactNode` | - |
+| onPrimaryButtonClick | 点击主按钮的回调 | `(event: MouseEvent<HTMLButtonElement>) => void \| Promise<void>` | - |
+| onSecondaryButtonClick | 点击次按钮的回调 | `(event: MouseEvent<HTMLButtonElement>) => void \| Promise<void>` | - |
+
+#### ResultPageDetail
+
+| 属性 | 说明 | 类型 |
+| --- | --- | --- |
+| label | 标签 | `ReactNode` |
+| value | 值 | `ReactNode` |
+| bold | 是否加粗 | `boolean` |
+
+### CSS 变量
+
+| 属性 | 说明 | 默认值 |
+| --- | --- | --- |
+| `--background-color` | 卡片主题色（受 status 控制） | `--adm-color-primary` |
+| `--adm-color-box` | 明细区背景色 | - |
+| `--adm-color-background` | 页面背景色 | - |
+| `--adm-color-text-light-solid` | 明细区文字色 | - |
+
+> 完整的 ResultPageProps 继承自 antd-mobile [ResultPageProps](https://mobile.ant.design/zh/components/result-page#api)，主题色由全局 CSS 变量统一注入。
+
+---
+
+### 级联选择器 TreeSelect
+
+# 级联选择器 TreeSelect
+
+移动端级联选择器组件，用于多层级数据的分类与选择。基于 antd-mobile TreeSelect 封装，注入企业品牌主题色，Props 完美透传。
+
+## 何时使用
+
+当数据具备多层级结构（省市区、分类、组织等）且需要逐级展开选择时使用。
+
+## 代码演示
+
+### 基础用法
+
+<code src="./demos/treeselect-basic.tsx"></code>
+
+## API
+
+### 属性
+
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| options | 可选项数据源 | `TreeSelectOption[]` | - |
+| defaultValue | 默认选中的 value 路径，非受控 | `string[]` | - |
+| value | 当前选中的 value 路径，受控 | `string[]` | - |
+| onChange | 选中节点发生改变时触发 | `(value: string[], extend: { options: TreeSelectOption[] }) => void` | - |
+| fieldNames | 自定义节点 label、value、children 的字段名 | `{ label?: string; value?: string; children?: string }` | - |
+
+### TreeSelectOption
+
+| 属性 | 说明 | 类型 |
+| --- | --- | --- |
+| label | 选项的文字 | `string` |
+| value | 选项的值 | `string` |
+| children | 子选项 | `TreeSelectOption[]` |
+
+### CSS 变量
+
+| 属性 | 说明 | 默认值 |
+| --- | --- | --- |
+| `--adm-color-white` | 第一列背景色 | - |
+| `--adm-color-box` | 第二列背景色 | - |
+| `--adm-color-primary` | 选中态主色 | `#1677ff` |
+| `--adm-font-size-main` | 文字字号 | - |
+
+> 完整的 TreeSelectProps 继承自 antd-mobile [TreeSelectProps](https://mobile.ant.design/zh/components/tree-select#api)，主题色由全局 CSS 变量统一注入。
+
+---
+
+# 共享组件
+
+## MobileIconExplorer — 图标探索器
+
+图标键名精选集见 /icon-library；其他共享组件建设中。
+
+---
+
+# 业务模板
+
+## 业务组件 Business Templates
+
+# 业务组件 Business Templates
+
+企业级移动端业务模板组件，基于 antd-mobile 封装，与 PC 端业务组件框架保持一致。
+
+> 内容待补充：页面级模板、嵌入型组件文档将在后续迭代中陆续完善。
+
+---

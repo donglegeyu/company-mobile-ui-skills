@@ -1,0 +1,131 @@
+# @donglegeyu/company-mobile-ui
+
+> 企业级移动端 React 组件库，基于 Ant Design Mobile 5.x 深度定制，品牌主色 `#F95914`。82 个基础组件 + 1 个共享组件，统一品牌令牌，严格使用规则。**主题由 CSS 变量（`--adm-color-*`）驱动，不是 React Context。**
+
+## Installation
+
+```bash
+npm install @donglegeyu/company-mobile-ui
+```
+
+Peer dependencies: `antd-mobile >=5.0.0`, `react >=18.0.0`, `react-dom >=18.0.0`.
+
+## Minimal Setup
+
+```tsx
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import { MobileThemeProvider, MobileButton } from '@donglegeyu/company-mobile-ui';
+
+createRoot(document.getElementById('root')!).render(
+  <MobileThemeProvider>
+    <MobileButton color="primary">Brand Button</MobileButton>
+  </MobileThemeProvider>
+);
+```
+
+主题色无需额外配置：`import "@donglegeyu/company-mobile-ui"` 即自动注入 `global.css`，在 `:root` 定义 `--adm-color-*` 品牌变量。`MobileThemeProvider` 仅用于 locale（语言包）。
+
+## Critical Rules for AI Agents
+
+1. NEVER use antd-mobile native components directly. Always use MobileXxx (e.g. MobileButton, not Button). `import type { ButtonProps } from 'antd-mobile'` type imports are allowed. `ConfigProvider` is allowed ONLY for locale.
+2. NEVER hardcode colors. Use CSS variables `var(--adm-color-*)` / `var(--mobile-color-*)` or the `mobileDesignRules` constant. For local theme overrides use `generateMobileThemeVars()` passed to a container style.
+3. NEVER use `!important` in styles. Use inline style (naturally higher specificity) or CSS Modules compliant nested selectors.
+4. NEVER use the `any` type. Define explicit TypeScript interfaces.
+5. NEVER use default exports. Always use named exports (export function / export const).
+6. `ConfigProvider` only takes `locale`. NEVER pass a `theme` prop (antd-mobile v5 silently ignores it).
+7. Mobile hard rules: tappable elements ≥ 44×44 (`--mobile-touch-target`); edge-sticking components use `.mobile-safe-area-top` / `.mobile-safe-area-bottom`; use only `px` units (project ships postcss-px-to-viewport-8-plugin — never mix rem/em/vw); never use PC-only events (`onMouseEnter` / `onMouseLeave` / `onDoubleClick` — use onClick/onTouchStart); add `-webkit-tap-highlight-color: transparent` to tappable elements.
+8. Business templates take priority over basic components: business templates (building) → shared components (MobileIconExplorer) → basic components (MobileButton / MobileInput / MobileList, 82 total).
+9. When unsure about component props, read the installed type definitions at `node_modules/@donglegeyu/company-mobile-ui/dist/es/index.d.ts` — do not write from memory. Otherwise look up the component section in llms-full.txt.
+10. After generating code, run the validator until 0 errors (governance loop stage ③):
+    `curl -O https://raw.githubusercontent.com/donglegeyu/company-mobile-ui-skills/main/scripts/ai-lint.mjs && node ai-lint.mjs src/`
+
+### Allowed antd-mobile imports (no MobileXxx wrapper or special case):
+
+`ConfigProvider` (locale only) — plus `import type { ...Props } from 'antd-mobile'` type imports.
+
+### Template priority order (highest first):
+
+1. **Business templates**: building (template-components directory is in place)
+2. **Shared components**: `MobileIconExplorer` (icon explorer)
+3. **Basic components**: MobileButton / MobileInput / MobileList ... (82 total) — manual assembly only when templates can't cover the use case
+
+## Theme Mechanism — KEY DIFFERENCE from PC antd
+
+| Dimension | PC antd | Mobile antd-mobile v5 |
+|---|---|---|
+| Theme driver | React Context (`theme.useToken()`) | **CSS variables** (`--adm-color-*`) |
+| ConfigProvider | supports `theme` prop | **does NOT** support `theme` prop, only `locale` |
+| Default primary | controlled by theme | `#1677ff` (read via CSS variable) |
+| Runtime token read | `theme.useToken()` | CSS variable `var(--adm-color-primary)` or `mobileDesignRules` constant |
+| Local override | `ConfigProvider theme` | `generateMobileThemeVars()` → CSS var object as container `style` |
+
+```tsx
+// ❌ WRONG (silently ignored)
+<ConfigProvider theme={themeConfig}>{/* ... */}</ConfigProvider>
+
+// ✅ CORRECT — local theme override
+import { generateMobileThemeVars, MobileButton } from '@donglegeyu/company-mobile-ui';
+export const NestedThemeExample = () => (
+  <div style={generateMobileThemeVars()}>
+    <MobileButton color="primary">局部主题色按钮</MobileButton>
+  </div>
+);
+```
+
+## Mobile Design Tokens (CSS variables)
+
+| Token | Value | Usage |
+|---|---|---|
+| `--adm-color-primary` | `#F95914` | Brand primary (global; overrides antd-mobile default blue `#1677ff`) |
+| `--adm-color-wathet` | `#FFF1E6` | Light-orange background (selected state / background) |
+| `--adm-color-success` | `#00B42A` | Success |
+| `--adm-color-warning` | `#FF7D00` | Warning |
+| `--adm-color-danger` | `#F53F3F` | Danger |
+| `--mobile-color-primary-hover` | `#E04E0E` | Pressed state |
+| `--mobile-touch-target` | `44px` | Min tappable target (Apple HIG) |
+| `--mobile-radius-base` | `8px` | Base radius (sm 6 / base 8 / lg 12 / full 9999) |
+
+Runtime reads (priority high→low): CSS variable `var(--adm-color-primary)` → `mobileDesignRules.colors.brand` → `useMobileToken()`.
+
+## Component List (82 basic + 1 shared)
+
+### 通用 (4)
+`MobileButton` · `MobileIcon` · `MobileDotLoading` · `MobileSpinLoading`
+
+### 布局 (5)
+`MobileAutoCenter` · `MobileDivider` · `MobileGrid` · `MobileSafeArea` · `MobileSpace`
+
+### 导航 (7)
+`MobileNavBar` · `MobileTabBar` · `MobileTabs` · `MobileCapsuleTabs` · `MobileJumboTabs` · `MobileSideBar` · `MobileIndexBar`
+
+### 信息录入 (24)
+`MobileInput` · `MobileTextArea` · `MobileSwitch` · `MobileCheckbox` · `MobileRadio` · `MobileForm` · `MobilePicker` · `MobileDatePicker` · `MobileCascader` · `MobileCascadePicker` · `MobileStepper` · `MobileRate` · `MobileSlider` · `MobileSelector` · `MobileSearchBar` · `MobileCheckList` · `MobilePickerView` · `MobileDatePickerView` · `MobileCascaderView` · `MobileCascadePickerView` · `MobileNumberKeyboard` · `MobilePasscodeInput` · `MobileImageUploader` · `MobileVirtualInput`
+
+### 信息展示 (16)
+`MobileList` · `MobileCard` · `MobileImage` · `MobileAvatar` · `MobileCollapse` · `MobileEllipsis` · `MobileTag` · `MobileSteps` · `MobileSwiper` · `MobileSegmented` · `MobilePageIndicator` · `MobileFloatingPanel` · `MobileImageViewer` · `MobileInfiniteScroll` · `MobileWaterMark` · `MobileFooter`
+
+### 反馈 (16)
+`MobileDialog` · `MobileToast` · `MobileActionSheet` · `MobileModal` · `MobilePopup` · `MobileCenterPopup` · `MobileMask` · `MobilePopover` · `MobileEmpty` · `MobileErrorBlock` · `MobileProgressBar` · `MobileProgressCircle` · `MobileResult` · `MobileSkeleton` · `MobileSwipeAction` · `MobilePullToRefresh`
+
+### 引导提示 (4)
+`MobileBadge` · `MobileNoticeBar` · `MobileFloatingBubble` · `MobileScrollMask`
+
+### 试验性 (6)
+`MobileCalendar` · `MobileCalendarPicker` · `MobileCalendarPickerView` · `MobileDropdown` · `MobileResultPage` · `MobileTreeSelect`
+
+### 共享 (1)
+`MobileIconExplorer`
+
+## Mobile-Specific Rules
+
+1. Tappable targets ≥ 44×44 (`--mobile-touch-target` / `mobileDesignRules.touchTarget`)
+2. Safe-area: `.mobile-safe-area-top` / `.mobile-safe-area-bottom` / `env(safe-area-inset-*)`
+3. `px` units only (postcss-px-to-viewport-8-plugin configured; never mix rem/em/vw)
+4. No PC events (`onMouseEnter` / `onMouseLeave` / `onDoubleClick`); use onClick/onTouchStart
+5. `-webkit-tap-highlight-color: transparent` on tappable elements (body already global)
+
+## Full Documentation
+
+- `llms-full.txt` — all component docs merged (auto-generated by `scripts/gen-llms.mjs`)
+- `design.md` — brand CSS variables + design specs + differences vs antd-mobile default theme
